@@ -33,10 +33,11 @@ export function usePerformance() {
       const entries = list.getEntries();
       entries.forEach((entry) => {
         if (entry.entryType === 'first-input') {
+          const eventEntry = entry as any; // PerformanceEventTiming
           trackEvent('web_vitals', {
             'event_category': 'performance',
             'event_label': 'FID',
-            'value': Math.round(entry.processingStart - entry.startTime)
+            'value': Math.round(eventEntry.processingStart - eventEntry.startTime)
           });
         }
       });
