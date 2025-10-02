@@ -39,8 +39,8 @@ export default function Home() {
     } catch (err: unknown) {
       setStatus("error");
       const fallback = "Une erreur est survenue.";
-      if (err && typeof err === "object" && "message" in err && typeof (err as any).message === "string") {
-        setMessage((err as { message: string }).message || fallback);
+      if (err instanceof Error) {
+        setMessage(err.message || fallback);
       } else {
         setMessage(fallback);
       }

@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     const { error } = await supabase.from("waiting").insert({ email: lowered });
     if (error) {
-      if ((error as any).code === "23505") {
+      if (error?.code === "23505") {
         return NextResponse.json({ ok: true, duplicate: true });
       }
       return NextResponse.json({ error: error.message }, { status: 400 });
