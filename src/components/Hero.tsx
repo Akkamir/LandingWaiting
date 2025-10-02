@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import NoSSR from "./NoSSR";
 import Head from "next/head";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 // Optimisation: Lazy loading de Lottie pour éviter le blocage du rendu initial
 const LottieAnimation = dynamic(() => import("./LottieAnimation"), {
@@ -24,6 +25,7 @@ type HeroProps = {
 
 export default function Hero({ email, status, message, onEmailChange, onSubmit }: HeroProps) {
   const [isVisible, setIsVisible] = useState(false);
+  const { trackEvent } = useAnalytics();
 
   // Optimisation: Intersection Observer pour charger Lottie seulement quand visible
   useEffect(() => {
@@ -55,15 +57,31 @@ export default function Hero({ email, status, message, onEmailChange, onSubmit }
       <div className="grid gap-8 md:grid-cols-2 items-center">
         <div>
           <h1 className="hero-title text-4xl md:text-6xl font-bold tracking-tight">
-            Transforme tes images<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-              en quelques secondes.
+            Transforme tes photos<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400" aria-label="en 10 secondes">
+              en 10 secondes
             </span>
           </h1>
           <p className="hero-subtitle mt-6 text-xl text-white/80 max-w-2xl leading-relaxed">
-            L&apos;outil IA qui transforme tes photos avec un simple prompt. 
-            <strong className="text-white"> Aucune compétence technique requise</strong>.
+            L&apos;IA qui améliore automatiquement tes photos. 
+            <strong className="text-white"> Résultats professionnels, zéro compétence requise</strong>.
           </p>
+          
+          {/* Preuve sociale visible */}
+          <div className="mt-4 flex items-center gap-4 text-sm text-white/60">
+            <div className="flex items-center gap-2">
+              <div className="flex -space-x-2">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 border-2 border-gray-900"></div>
+                <div className="w-6 h-6 rounded-full bg-gradient-to-r from-green-400 to-blue-400 border-2 border-gray-900"></div>
+                <div className="w-6 h-6 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 border-2 border-gray-900"></div>
+              </div>
+              <span>2,847 créateurs actifs</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-yellow-400">★★★★★</span>
+              <span>4.9/5</span>
+            </div>
+          </div>
           <form className="input-bar mt-6" onSubmit={onSubmit} role="form" aria-label="Formulaire d'inscription à la liste d'attente">
             <div className="flex flex-col sm:flex-row gap-3 w-full">
               <input
@@ -85,7 +103,7 @@ export default function Hero({ email, status, message, onEmailChange, onSubmit }
               <button
                 type="submit"
                 aria-label="Rejoindre la liste d'attente"
-                className="btn-primary btn-xl text-base md:text-lg font-bold shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 whitespace-nowrap min-h-[48px] min-w-[48px]"
+                className="btn-primary btn-xl text-base md:text-lg font-bold shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 whitespace-nowrap min-h-[48px] min-w-[48px] bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 border-0 text-white"
                 disabled={status === "loading"}
                 aria-describedby="submit-help"
               >
@@ -118,6 +136,39 @@ export default function Hero({ email, status, message, onEmailChange, onSubmit }
               {message}
             </div>
           )}
+          
+          {/* CTA secondaire */}
+          <div className="mt-4 flex items-center gap-4 text-sm">
+            <button 
+              onClick={() => {
+                trackEvent({
+                  event: 'cta_click',
+                  category: 'engagement',
+                  label: 'see_examples',
+                  properties: { section: 'hero' }
+                });
+                document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="text-blue-400 hover:text-blue-300 underline transition-colors"
+            >
+              Voir les exemples →
+            </button>
+            <span className="text-white/40">•</span>
+            <button 
+              onClick={() => {
+                trackEvent({
+                  event: 'cta_click',
+                  category: 'engagement',
+                  label: 'see_pricing',
+                  properties: { section: 'hero' }
+                });
+                document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="text-blue-400 hover:text-blue-300 underline transition-colors"
+            >
+              Voir les tarifs →
+            </button>
+          </div>
         </div>
         <div 
           id="lottie-container"

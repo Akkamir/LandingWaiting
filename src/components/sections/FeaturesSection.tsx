@@ -42,12 +42,32 @@ export function FeaturesSection() {
   return (
     <section id="features" className="container py-20 md:py-28">
       <div className="text-center mb-16">
+        <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/20 rounded-full px-4 py-2 mb-6">
+          <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+          <span className="text-green-400 text-sm font-medium">2,847 créateurs actifs</span>
+        </div>
         <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          Pourquoi 2,847 créateurs nous font confiance
+          Pourquoi nos utilisateurs nous font confiance
         </h2>
         <p className="text-xl text-white/70 max-w-3xl mx-auto">
           Transformez vos photos sans compétences techniques. Résultats professionnels en quelques clics.
         </p>
+        
+        {/* Statistiques de confiance */}
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl mx-auto">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-blue-400">10s</div>
+            <div className="text-sm text-white/60">Temps moyen</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-green-400">4.9/5</div>
+            <div className="text-sm text-white/60">Satisfaction</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-purple-400">99%</div>
+            <div className="text-sm text-white/60">Réussite</div>
+          </div>
+        </div>
       </div>
       
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">

@@ -1,35 +1,55 @@
-import { useCallback } from "react";
+"use client";
 
-interface AnalyticsEvent {
-  event_category: string;
-  event_label: string;
+import { useCallback } from 'react';
+
+// Types pour les événements de tracking
+export interface AnalyticsEvent {
+  event: string;
+  category?: string;
+  label?: string;
   value?: number;
+  properties?: Record<string, any>;
 }
 
 export function useAnalytics() {
-  const trackEvent = useCallback((eventName: string, parameters: AnalyticsEvent) => {
+  const trackEvent = useCallback((eventData: AnalyticsEvent) => {
+    // Google Analytics 4
     if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', eventName, parameters);
+      (window as any).gtag('event', eventData.event, {
+        event_category: eventData.category || 'engagement',
+        event_label: eventData.label,
+        value: eventData.value,
+        custom_parameters: eventData.properties
+      });
+    }
+
+    // Console log pour le développement
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[ANALYTICS]', eventData);
     }
   }, []);
 
-  const trackPageView = useCallback((pagePath: string) => {
+  const trackPageView = useCallback((page: string) => {
     if (typeof window !== 'undefined' && (window as any).gtag) {
       (window as any).gtag('config', 'GA_MEASUREMENT_ID', {
-        page_path: pagePath,
+        page_title: page,
+        page_location: window.location.href
       });
     }
   }, []);
 
-  const trackConversion = useCallback((conversionId: string, value?: number) => {
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', 'conversion', {
-        send_to: conversionId,
-        value: value,
-        currency: 'EUR'
-      });
-    }
-  }, []);
+  const trackConversion = useCallback((conversionType: string, value?: number) => {
+    trackEvent({
+      event: 'conversion',
+      category: 'conversion',
+      label: conversionType,
+      value: value,
+      properties: {
+        conversion_type: conversionType,
+        timestamp: Date.now()
+      }
+    });
+  }, [trackEvent]);
 
   return {
     trackEvent,

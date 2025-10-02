@@ -66,6 +66,8 @@ export default function Home() {
 
                     <TestimonialsSection />
 
+                    <div className="container"><div className="divider" /></div>
+
         <div className="container"><div className="divider" /></div>
 
         <PricingSection />

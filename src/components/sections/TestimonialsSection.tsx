@@ -1,111 +1,90 @@
-import { useRef, useState, useEffect } from "react";
-
 const testimonials = [
   {
-    id: "clara",
-    name: "Clara M.",
-    role: "Product Manager @TechCorp",
-    avatar: "C",
-    gradient: "from-blue-500 to-purple-500",
-    quote: "Révolutionnaire ! J'ai transformé mes photos de voyage en œuvres d'art. +300% d'engagement sur Instagram !",
-    emoji: "🎨"
+    name: "Sarah M.",
+    role: "Créatrice de contenu",
+    avatar: "👩‍💼",
+    content: "J'ai transformé mes photos de profil en 30 secondes. L'IA a automatiquement amélioré l'éclairage et retiré l'arrière-plan. Incroyable !",
+    rating: 5,
+    verified: true
   },
   {
-    id: "nabil",
-    name: "Nabil K.",
-    role: "Développeur Senior",
-    avatar: "N",
-    gradient: "from-green-500 to-blue-500",
-    quote: "Simple, rapide, exactement ce qu'il me fallait. Mes visuels de marque sont maintenant professionnels.",
-    emoji: "⚡️"
+    name: "Marc L.",
+    role: "E-commerçant",
+    avatar: "👨‍💻",
+    content: "Mes photos produits sont maintenant professionnelles. Plus besoin de photographe, l'IA fait tout. ROI immédiat !",
+    rating: 5,
+    verified: true
   },
   {
-    id: "jade",
-    name: "Jade L.",
-    role: "Freelance Designer",
-    avatar: "J",
-    gradient: "from-purple-500 to-pink-500",
-    quote: "J'ai remplacé Photoshop par cet outil. L'interface est intuitive et les résultats bluffants.",
-    emoji: "🎯"
-  },
-  {
-    id: "thomas",
-    name: "Thomas R.",
-    role: "CEO @StartupXYZ",
-    avatar: "T",
-    gradient: "from-orange-500 to-red-500",
-    quote: "La créativité sans limites. Mon équipe crée des visuels époustouflants en quelques clics.",
-    emoji: "🚀"
+    name: "Emma K.",
+    role: "Influenceuse",
+    avatar: "👩‍🎨",
+    content: "Les styles prédéfinis sont parfaits pour Instagram. Mes stories ont un look professionnel maintenant.",
+    rating: 5,
+    verified: true
   }
 ];
 
 export function TestimonialsSection() {
-  const testimonialsTrackRef = useRef<HTMLDivElement | null>(null);
-  const testimonialsWrapRef = useRef<HTMLDivElement | null>(null);
-  const [hoverTestimonials, setHoverTestimonials] = useState(false);
-
-  // Auto-carousel for testimonials (pause on hover, reduced motion)
-  useEffect(() => {
-    const prefersReduced = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const track = testimonialsTrackRef.current;
-    if (!track || prefersReduced) return;
-    
-    let x = 0;
-    let raf: number | null = null;
-    
-    function step() {
-      if (!hoverTestimonials && track) {
-        x -= 0.5; // vitesse
-        const width = track.scrollWidth / 2; // contenu dupliqué
-        if (Math.abs(x) >= width) x = 0;
-        track.style.transform = `translateX(${x}px)`;
-      }
-      raf = requestAnimationFrame(step);
-    }
-    raf = requestAnimationFrame(step);
-    return () => { if (raf) cancelAnimationFrame(raf); };
-  }, [hoverTestimonials]);
-
   return (
-    <section id="testimonials" className="container py-16 md:py-24">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">Ils transforment leurs images</h2>
-        <p className="text-lg text-white/70">Découvre comment nos utilisateurs créent des visuels époustouflants</p>
-        <div className="mt-4 flex items-center justify-center gap-2 text-sm text-white/60">
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-            <span>2,847 créateurs actifs</span>
-          </span>
-          <span>•</span>
-          <span>+50,000 images transformées</span>
-        </div>
+    <section id="testimonials" className="container py-20">
+      <div className="text-center mb-16">
+        <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          Ce que disent nos utilisateurs
+        </h2>
+        <p className="text-xl text-white/70 max-w-3xl mx-auto">
+          Plus de 2,800 créateurs nous font confiance pour transformer leurs photos
+        </p>
       </div>
       
-      <div className="relative">
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-black to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-black to-transparent" />
-        <div 
-          className="mt-4 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]" 
-          ref={testimonialsWrapRef} 
-          onMouseEnter={() => setHoverTestimonials(true)} 
-          onMouseLeave={() => setHoverTestimonials(false)}
-        >
-          <div className="flex gap-6 will-change-transform" ref={testimonialsTrackRef} style={{ width: "max-content" }}>
-            {/* Render testimonials twice for seamless loop */}
-            {[...testimonials, ...testimonials].map((testimonial, index) => (
-              <blockquote key={`${testimonial.id}-${index}`} className="card p-6 text-sm text-[#c7d2e2] min-w-[350px]">
-                <div className="flex items-center mb-4">
-                  <div className={`w-12 h-12 bg-gradient-to-r ${testimonial.gradient} rounded-full flex items-center justify-center text-white font-bold text-lg`}>
-                    {testimonial.avatar}
-                  </div>
-                  <div className="ml-4">
-                    <div className="font-semibold text-white">{testimonial.name}</div>
-                    <div className="text-xs text-white/60">{testimonial.role}</div>
-                  </div>
+      <div className="grid gap-6 md:grid-cols-3">
+        {testimonials.map((testimonial, index) => (
+          <article 
+            key={index}
+            className="card p-6 hover:ring-2 hover:ring-blue-500/20 transition-all duration-300"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="text-2xl">{testimonial.avatar}</div>
+              <div>
+                <div className="font-semibold text-white">{testimonial.name}</div>
+                <div className="text-sm text-white/60">{testimonial.role}</div>
+              </div>
+              {testimonial.verified && (
+                <div className="ml-auto">
+                  <span className="text-green-400 text-xs">✓ Vérifié</span>
                 </div>
-                &quot;{testimonial.quote}&quot; <span>{testimonial.emoji}</span>
-              </blockquote>
-            ))}
+              )}
+            </div>
+            
+            <div className="flex items-center gap-1 mb-3">
+              {[...Array(testimonial.rating)].map((_, i) => (
+                <span key={i} className="text-yellow-400">★</span>
+              ))}
+            </div>
+            
+            <blockquote className="text-white/80 italic">
+              "{testimonial.content}"
+            </blockquote>
+          </article>
+        ))}
+      </div>
+      
+      {/* Badge de confiance */}
+      <div className="mt-12 text-center">
+        <div className="inline-flex items-center gap-4 bg-white/5 border border-white/10 rounded-full px-6 py-3">
+          <div className="flex items-center gap-2">
+            <span className="text-green-400">🔒</span>
+            <span className="text-sm text-white/80">Données sécurisées</span>
+          </div>
+          <div className="w-px h-4 bg-white/20"></div>
+          <div className="flex items-center gap-2">
+            <span className="text-blue-400">⚡</span>
+            <span className="text-sm text-white/80">Traitement rapide</span>
+          </div>
+          <div className="w-px h-4 bg-white/20"></div>
+          <div className="flex items-center gap-2">
+            <span className="text-purple-400">🎯</span>
+            <span className="text-sm text-white/80">Résultats garantis</span>
           </div>
         </div>
       </div>
