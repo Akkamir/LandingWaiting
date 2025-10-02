@@ -30,8 +30,7 @@ export default function RootLayout({
   return (
     <html lang="fr" className={inter.variable}>
       <head>
-        {/* Optimisation: Preload des assets critiques */}
-        <link rel="preload" href="/Bouncing Square.json" as="fetch" crossOrigin="anonymous" />
+        {/* Optimisation: Preload des assets critiques (seulement sur la page d'accueil) */}
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="dns-prefetch" href="//fonts.gstatic.com" />
         {/* Favicon pour éviter l'erreur 500 */}

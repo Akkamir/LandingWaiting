@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import NoSSR from "./NoSSR";
+import Head from "next/head";
 
 // Optimisation: Lazy loading de Lottie pour éviter le blocage du rendu initial
 const LottieAnimation = dynamic(() => import("./LottieAnimation"), {
@@ -26,6 +27,14 @@ export default function Hero({ email, status, message, onEmailChange, onSubmit }
 
   // Optimisation: Intersection Observer pour charger Lottie seulement quand visible
   useEffect(() => {
+    // Preload du fichier Lottie seulement quand le composant est monté
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.href = '/Bouncing Square.json';
+    link.as = 'fetch';
+    link.crossOrigin = 'anonymous';
+    document.head.appendChild(link);
+    
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {

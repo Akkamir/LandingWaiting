@@ -67,11 +67,17 @@ export const clientRateLimit = new ClientRateLimit();
 // Logging sécurisé côté client
 export function logSecurityEvent(event: string, details: Record<string, unknown> = {}) {
   if (typeof window !== 'undefined' && window.console) {
-    console.warn(`[SECURITY] ${event}:`, {
-      ...details,
-      timestamp: new Date().toISOString(),
-      userAgent: navigator.userAgent,
-      url: window.location.href
-    });
+    // Éviter les erreurs Sentry en mode développement
+    try {
+      console.warn(`[SECURITY] ${event}:`, {
+        ...details,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        url: window.location.href
+      });
+    } catch (error) {
+      // Ignorer les erreurs de console (Sentry bloqué, etc.)
+      console.log(`[SECURITY] ${event}:`, details);
+    }
   }
 }

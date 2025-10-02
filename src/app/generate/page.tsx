@@ -8,6 +8,7 @@ import { PlatformSizePresets, type SizePreset } from "@/components/ui/PlatformSi
 import { PrivacyControls, type PrivacySettings } from "@/components/ui/PrivacyControls";
 import { BeforeAfterSlider } from "@/components/ui/BeforeAfterSlider";
 import { useImageGeneration } from "@/hooks/useImageGeneration";
+import NoSSR from "@/components/NoSSR";
 
 export default function GeneratePage() {
   const {
@@ -42,7 +43,7 @@ export default function GeneratePage() {
   }, [previewUrl]);
 
   return (
-    <>
+    <NoSSR>
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-md">
         <div className="container py-3 flex items-center justify-between">
                   <Link href="/" className="font-semibold tracking-tight">ImageAI</Link>
@@ -182,7 +183,7 @@ export default function GeneratePage() {
         </div>
       </div>
     </section>
-    </>
+    </NoSSR>
   );
 }
 
