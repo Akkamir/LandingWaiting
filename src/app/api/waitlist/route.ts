@@ -29,11 +29,19 @@ function getSupabaseClient() {
   if (!env) return null;
   
   return createClient(env.supabaseUrl, env.supabaseServiceRoleKey, { 
-    auth: { persistSession: false },
+    auth: { 
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false
+    },
     global: {
       headers: {
-        'X-Client-Info': 'imageai-waitlist-api'
+        'X-Client-Info': 'imageai-waitlist-api',
+        'Authorization': `Bearer ${env.supabaseServiceRoleKey}`
       }
+    },
+    db: {
+      schema: 'public'
     }
   });
 }
@@ -87,14 +95,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, duplicate: true });
     }
 
-    // Insertion sécurisée
-    const { error } = await supabase.from("waiting").insert({ 
-      email,
-      created_at: new Date().toISOString(),
-      ip_address: ip // Pour audit de sécurité
+    // Insertion sécurisée avec diagnostic détaillé
+    console.log("[waitlist] Tentative d'insertion:", { 
+      email: email.substring(0, 3) + "***", // Masquage partiel pour sécurité
+      ip,
+      timestamp: new Date().toISOString()
     });
     
+    const { data, error } = await supabase
+      .from("waiting")
+      .insert({ 
+        email
+      })
+      .select();
+    
     if (error) {
+      console.error("[SECURITY] Database insert error détaillé:", { 
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        ip,
+        timestamp: new Date().toISOString()
+      });
+      
       if (error?.code === "23505") {
         console.log("[waitlist] Contrainte unique côté DB", { 
           ip,
@@ -103,13 +127,20 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ ok: true, duplicate: true });
       }
       
-      console.error("[SECURITY] Database insert error:", { 
-        code: error.code,
-        ip,
-        timestamp: new Date().toISOString()
-      });
+      // Gestion spécifique de l'erreur PGRST204
+      if (error?.code === "PGRST204") {
+        console.error("[SECURITY] Table 'waiting' non trouvée ou permissions insuffisantes");
+        return NextResponse.json({ error: "Configuration de base de données manquante" }, { status: 503 });
+      }
+      
       return NextResponse.json({ error: "Erreur de traitement" }, { status: 500 });
     }
+    
+    console.log("[waitlist] Insertion réussie:", { 
+      data,
+      ip,
+      timestamp: new Date().toISOString()
+    });
     
     console.log("[waitlist] Inscription réussie", { 
       ip,
