@@ -112,7 +112,7 @@ export default function Home() {
               </a>
             ))}
           </nav>
-          <a href="#hero" className="rounded-full border border-white/15 bg-white/10 px-5 py-2 text-sm font-medium text-white/90 transition hidden sm:inline-flex hover:bg-white hover:text-black focus-visible:ring-2 focus-visible:ring-white/40 magnet" onMouseMove={(e) => {
+          <a href="/generate" className="rounded-full border border-white/15 bg-white/10 px-5 py-2 text-sm font-medium text-white/90 transition hidden sm:inline-flex hover:bg-white hover:text-black focus-visible:ring-2 focus-visible:ring-white/40 magnet" onMouseMove={(e) => {
             const target = e.currentTarget as HTMLAnchorElement;
             const rect = target.getBoundingClientRect();
             const relX = e.clientX - rect.left - rect.width/2;
