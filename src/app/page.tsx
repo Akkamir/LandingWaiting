@@ -72,7 +72,7 @@ export default function Home() {
 
       <Toast 
         show={waitlistForm.showToast} 
-        message="✅ Inscription réussie. À très vite !" 
+        message="✅ Inscription réussie ! Redirection vers le produit..." 
         onClose={() => waitlistForm.setShowToast(false)} 
       />
 

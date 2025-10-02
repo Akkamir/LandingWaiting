@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAnalytics } from "./useAnalytics";
 import { validateEmailClient, sanitizeUserInput, clientRateLimit, logSecurityEvent } from "@/lib/security";
 
@@ -10,6 +11,7 @@ export function useWaitlistForm() {
   const [message, setMessage] = useState<string>("");
   const [showToast, setShowToast] = useState(false);
   const { trackEvent } = useAnalytics();
+  const router = useRouter();
 
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +59,7 @@ export function useWaitlistForm() {
       if (!res.ok) throw new Error(data?.error || "Erreur inconnue");
       
       setStatus("success");
-      setMessage("Merci, tu es bien inscrit(e) !");
+      setMessage("Merci, tu es bien inscrit(e) ! Redirection vers le produit...");
       setShowToast(true);
       setEmail("");
       
@@ -66,6 +68,15 @@ export function useWaitlistForm() {
         'event_label': 'waitlist_signup',
         'value': 1
       });
+      
+      // Redirection vers la page du produit après 2 secondes
+      setTimeout(() => {
+        trackEvent('redirect_to_product', {
+          'event_category': 'navigation',
+          'event_label': 'post_signup_redirect'
+        });
+        router.push('/generate');
+      }, 2000);
     } catch (err: unknown) {
       setStatus("error");
       const fallback = "Une erreur est survenue.";
