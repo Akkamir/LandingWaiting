@@ -144,14 +144,14 @@ export default function Hero({ email, status, message, onEmailChange, onSubmit }
                 trackEvent({
                   event: 'cta_click',
                   category: 'engagement',
-                  label: 'see_examples',
+                  label: 'see_features',
                   properties: { section: 'hero' }
                 });
                 document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
               }}
               className="text-blue-400 hover:text-blue-300 underline transition-colors"
             >
-              Voir les exemples →
+              Voir les fonctionnalités →
             </button>
             <span className="text-white/40">•</span>
             <button 

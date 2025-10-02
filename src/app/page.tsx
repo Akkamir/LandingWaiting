@@ -5,7 +5,6 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { FeaturesSection } from "@/components/sections/FeaturesSection";
 import { HowItWorksSection } from "@/components/sections/HowItWorksSection";
-import { ExamplesSection } from "@/components/sections/ExamplesSection";
 import { TestimonialsSection } from "@/components/sections/TestimonialsSection";
 import { PricingSection } from "@/components/sections/PricingSection";
 import { FAQSection } from "@/components/sections/FAQSection";
@@ -57,10 +56,6 @@ export default function Home() {
                     <div className="container"><div className="divider" /></div>
 
                     <HowItWorksSection />
-
-                    <div className="container"><div className="divider" /></div>
-
-                    <ExamplesSection />
 
                     <div className="container"><div className="divider" /></div>
 
