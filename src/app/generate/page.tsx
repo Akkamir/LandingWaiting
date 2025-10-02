@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 
 export default function GeneratePage() {
   const [file, setFile] = useState<File | null>(null);
@@ -41,8 +42,8 @@ export default function GeneratePage() {
     <>
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-md">
         <div className="container py-3 flex items-center justify-between">
-          <a href="/" className="font-semibold tracking-tight">ChroniQuest</a>
-          <a href="/" className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 transition hover:bg-white hover:text-black focus-visible:ring-2 focus-visible:ring-white/40">← Retour à la landing</a>
+          <Link href="/" className="font-semibold tracking-tight">ChroniQuest</Link>
+          <Link href="/" className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 transition hover:bg-white hover:text-black focus-visible:ring-2 focus-visible:ring-white/40">← Retour à la landing</Link>
         </div>
       </header>
     <section className="min-h-screen section-gradient">
