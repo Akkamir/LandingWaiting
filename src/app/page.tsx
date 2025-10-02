@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Hero from "@/components/Hero";
 import { useOptimizedAnimations, useHoverOptimization } from "@/components/OptimizedAnimations";
@@ -164,7 +165,7 @@ export default function Home() {
     <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-md">
         <div className="container py-3 flex items-center justify-between">
-          <a className="font-semibold tracking-tight" href="/" aria-label="ImageAI - Accueil">ImageAI</a>
+          <Link href="/" className="font-semibold tracking-tight" aria-label="ImageAI - Accueil">ImageAI</Link>
           <nav className="hidden md:flex items-center gap-8 text-sm text-white/80" role="navigation" aria-label="Navigation principale">
             {[
               { label: 'Produit', href: '#features' },

@@ -37,8 +37,8 @@ export function useOptimizedAnimations() {
     return () => {
       observer.disconnect();
       // Retire will-change de tous les éléments observés
-      const elements = elementsRef.current;
-      elements.forEach((element) => {
+      const currentElements = elementsRef.current;
+      currentElements.forEach((element) => {
         element.style.willChange = "auto";
       });
     };
