@@ -1,207 +1,94 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
-// Conversion tracking basé sur la recherche - addresses CRO needs
+// Événements de conversion à tracker
+export const conversionEvents = {
+  // Funnel d'activation
+  file_selected: 'file_selected',
+  preset_clicked: 'preset_clicked', 
+  prompt_submitted: 'prompt_submitted',
+  lowres_preview_shown: 'lowres_preview_shown',
+  final_render_done: 'final_render_done',
+  download_clicked: 'download_clicked',
+  
+  // Funnel de conversion
+  credit_topup_clicked: 'credit_topup_clicked',
+  pricing_viewed: 'pricing_viewed',
+  examples_viewed: 'examples_viewed',
+  
+  // Engagement
+  before_after_slider_used: 'before_after_slider_used',
+  privacy_settings_changed: 'privacy_settings_changed',
+  platform_size_selected: 'platform_size_selected'
+} as const;
+
+export type ConversionEvent = typeof conversionEvents[keyof typeof conversionEvents];
+
+interface ConversionTrackingOptions {
+  event: ConversionEvent;
+  properties?: Record<string, any>;
+  value?: number;
+}
+
 export function useConversionTracking() {
-  useEffect(() => {
-    // Initialize conversion tracking
+  const trackEvent = (options: ConversionTrackingOptions) => {
+    // Google Analytics 4
     if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('config', 'GA_MEASUREMENT_ID', {
-        custom_map: {
-          'custom_parameter_1': 'preset_chosen',
-          'custom_parameter_2': 'seed_reuse',
-          'custom_parameter_3': 'batch_export',
-          'custom_parameter_4': 'privacy_click'
-        }
-      });
-    }
-  }, []);
-
-  // Track preset selection - addresses quality consistency concerns
-  const trackPresetChosen = (preset: string, category: string) => {
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'preset_chosen', {
-        event_category: 'engagement',
-        event_label: `${category}_${preset}`,
-        value: 1
-      });
-    }
-  };
-
-  // Track seed reuse - addresses repeatability concerns
-  const trackSeedReuse = (seed: string) => {
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'seed_reuse', {
-        event_category: 'quality',
-        event_label: 'consistency',
-        value: 1
-      });
-    }
-  };
-
-  // Track batch export - addresses CRO needs
-  const trackBatchExport = (variantCount: number, platformSizes: string[]) => {
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'batch_export', {
+      window.gtag('event', options.event, {
         event_category: 'conversion',
-        event_label: `${variantCount}_variants_${platformSizes.length}_sizes`,
-        value: variantCount * platformSizes.length
+        event_label: options.event,
+        value: options.value,
+        custom_parameters: options.properties
       });
     }
+    
+    // Console log pour debug
+    console.log(`[CONVERSION] ${options.event}:`, options.properties);
   };
 
-  // Track privacy policy clicks - addresses trust concerns
-  const trackPrivacyClick = (source: string) => {
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'privacy_click', {
-        event_category: 'trust',
-        event_label: source,
-        value: 1
-      });
-    }
-  };
-
-  // Track upload to generation rate - key conversion metric
-  const trackUploadToGenerate = (timeToGenerate: number, fileSize: number) => {
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'upload_to_generate', {
-        event_category: 'conversion',
-        event_label: 'time_to_first_export',
-        value: timeToGenerate,
-        custom_parameter_1: fileSize
-      });
-    }
-  };
-
-  // Track multi-variant usage - addresses A/B testing needs
-  const trackMultiVariantUsage = (variantCount: number, useCase: string) => {
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'multi_variant_usage', {
-        event_category: 'cro',
-        event_label: `${variantCount}_variants_${useCase}`,
-        value: variantCount
-      });
-    }
-  };
-
-  // Track platform-specific exports - addresses channel needs
-  const trackPlatformExport = (platform: string, size: string) => {
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'platform_export', {
-        event_category: 'channel',
-        event_label: `${platform}_${size}`,
-        value: 1
-      });
-    }
-  };
-
-  // Track error rates - addresses quality consistency
-  const trackGenerationError = (errorType: string, retryCount: number) => {
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'generation_error', {
-        event_category: 'quality',
-        event_label: errorType,
-        value: retryCount
-      });
-    }
-  };
-
-  // Track time to first export - key performance metric
-  const trackTimeToFirstExport = (timeToExport: number, method: string) => {
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'time_to_first_export', {
-        event_category: 'performance',
-        event_label: method,
-        value: timeToExport
-      });
-    }
-  };
-
-  return {
-    trackPresetChosen,
-    trackSeedReuse,
-    trackBatchExport,
-    trackPrivacyClick,
-    trackUploadToGenerate,
-    trackMultiVariantUsage,
-    trackPlatformExport,
-    trackGenerationError,
-    trackTimeToFirstExport
-  };
-}
-
-// A/B Testing for Hero H1 variants
-export function useABTesting() {
+  // Tracking automatique des interactions importantes
   useEffect(() => {
-    // Simple A/B test for Hero H1
-    const variants = [
-      "Transform any image into on-brand visuals—in seconds.",
-      "From input to stunning, sized-for-social images—no prompt expertise.",
-      "Production-ready product photos & social visuals—fast, private, repeatable."
-    ];
-    
-    const variantIndex = Math.floor(Math.random() * variants.length);
-    const selectedVariant = variants[variantIndex];
-    
-    // Store variant for tracking
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('hero_variant', variantIndex.toString());
-      
-      // Track variant assignment
-      if (window.gtag) {
-        window.gtag('event', 'ab_test_assignment', {
-          event_category: 'experiment',
-          event_label: `hero_h1_variant_${variantIndex}`,
-          value: 1
-        });
-      }
-    }
-    
-    return selectedVariant;
+    const handleFileSelect = () => trackEvent({ event: conversionEvents.file_selected });
+    const handlePresetClick = () => trackEvent({ event: conversionEvents.preset_clicked });
+    const handlePromptSubmit = () => trackEvent({ event: conversionEvents.prompt_submitted });
+    const handleDownload = () => trackEvent({ event: conversionEvents.download_clicked });
+
+    // Écouter les événements DOM
+    document.addEventListener('file_selected', handleFileSelect);
+    document.addEventListener('preset_clicked', handlePresetClick);
+    document.addEventListener('prompt_submitted', handlePromptSubmit);
+    document.addEventListener('download_clicked', handleDownload);
+
+    return () => {
+      document.removeEventListener('file_selected', handleFileSelect);
+      document.removeEventListener('preset_clicked', handlePresetClick);
+      document.removeEventListener('prompt_submitted', handlePromptSubmit);
+      document.removeEventListener('download_clicked', handleDownload);
+    };
   }, []);
+
+  return { trackEvent };
 }
 
-// Performance tracking for Core Web Vitals
-export function usePerformanceTracking() {
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.gtag) {
-      // Track LCP (Largest Contentful Paint)
-      new PerformanceObserver((list) => {
-        const entries = list.getEntries();
-        const lastEntry = entries[entries.length - 1];
-        window.gtag('event', 'web_vitals', {
-          event_category: 'performance',
-          event_label: 'LCP',
-          value: Math.round(lastEntry.startTime)
-        });
-      }).observe({ entryTypes: ['largest-contentful-paint'] });
-
-      // Track FID (First Input Delay)
-      new PerformanceObserver((list) => {
-        const entries = list.getEntries();
-        entries.forEach((entry) => {
-          window.gtag('event', 'web_vitals', {
-            event_category: 'performance',
-            event_label: 'FID',
-            value: Math.round(entry.processingStart - entry.startTime)
-          });
-        });
-      }).observe({ entryTypes: ['first-input'] });
-
-      // Track CLS (Cumulative Layout Shift)
-      new PerformanceObserver((list) => {
-        let clsValue = 0;
-        const entries = list.getEntries();
-        entries.forEach((entry) => {
-          if (!entry.hadRecentInput) {
-            clsValue += entry.value;
-          }
-        });
-        window.gtag('event', 'web_vitals', {
-          event_category: 'performance',
-          event_label: 'CLS',
-          value: Math.round(clsValue * 1000)
-        });
-      }).observe({ entryTypes: ['layout-shift'] });
-    }
-  }, []);
-}
+// Tests A/B proposés
+export const abTests = {
+  hero_variants: {
+    test_name: 'hero_variants',
+    variants: ['restoration', 'social', 'seller'],
+    metric: 'conversion_rate'
+  },
+  cta_text: {
+    test_name: 'cta_text', 
+    variants: ['Transform Now', 'Enhance Photo', 'Try Free'],
+    metric: 'click_through_rate'
+  },
+  preset_order: {
+    test_name: 'preset_order',
+    variants: ['enhancement_first', 'social_first', 'product_first'],
+    metric: 'preset_click_rate'
+  },
+  gallery_position: {
+    test_name: 'gallery_position',
+    variants: ['above_fold', 'below_fold'],
+    metric: 'scroll_depth'
+  }
+} as const;

@@ -46,21 +46,21 @@ export default function Hero({ email, status, message, onEmailChange, onSubmit }
       <div className="grid gap-8 md:grid-cols-2 items-center">
         <div>
           <h1 className="hero-title text-4xl md:text-6xl font-bold tracking-tight">
-            Transform any image into<br />
+            Transforme tes images<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-              on-brand visuals—in seconds.
+              en quelques secondes.
             </span>
           </h1>
           <p className="hero-subtitle mt-6 text-xl text-white/80 max-w-2xl leading-relaxed">
-            Upload, choose a style or paste a prompt, and export platform-ready variants. 
-            <strong className="text-white"> We never train on your images</strong>.
+            L&apos;outil IA qui transforme tes photos avec un simple prompt. 
+            <strong className="text-white"> Aucune compétence technique requise</strong>.
           </p>
           <form className="input-bar mt-6" onSubmit={onSubmit} role="form" aria-label="Formulaire d'inscription à la liste d'attente">
             <div className="flex flex-col sm:flex-row gap-3 w-full">
               <input
                 type="email"
                 className="input-ghost flex-1 min-h-[48px]"
-                placeholder="Your email for early access"
+                placeholder="Ton email pour accéder en priorité"
                 value={email}
                 onChange={(e) => onEmailChange(e.target.value)}
                 disabled={status === "loading"}
@@ -75,20 +75,20 @@ export default function Hero({ email, status, message, onEmailChange, onSubmit }
               />
               <button
                 type="submit"
-                aria-label="Join the waitlist"
+                aria-label="Rejoindre la liste d'attente"
                 className="btn-primary btn-xl text-base md:text-lg font-bold shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 whitespace-nowrap min-h-[48px] min-w-[48px]"
                 disabled={status === "loading"}
                 aria-describedby="submit-help"
               >
                 {status === "loading" ? (
                   <>
-                    <span className="sr-only">Joining waitlist</span>
+                    <span className="sr-only">Inscription en cours</span>
                     <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin mr-2" />
-                    Joining...
+                    Inscription…
                   </>
                 ) : (
                   <>
-                    🚀 Generate Now
+                    🚀 Essayer gratuitement
                     <span className="hidden sm:inline"> </span>
                   </>
                 )}

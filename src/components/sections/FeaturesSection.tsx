@@ -1,24 +1,40 @@
 const features = [
   {
     icon: "⚡",
-    title: "Génération instantanée",
-    description: "Transforme tes images en quelques secondes. Pas d'attente, pas de complexité."
+    title: "Résultats en 10-30 secondes",
+    description: "Transformations instantanées avec prévisualisation en temps réel. Pas d'attente, pas de complexité.",
+    benefit: "Gain de temps"
   },
   {
-    icon: "🎨",
-    title: "Styles illimités",
-    description: "De l'aquarelle au cyberpunk, transforme selon tes envies avec un simple prompt."
+    icon: "🎯",
+    title: "Styles prédéfinis intelligents",
+    description: "5 styles optimisés : Amélioration visage, Nettoyage arrière-plan, Éclairage portrait, Restauration vintage, Découpe produit.",
+    benefit: "Simplicité"
   },
   {
     icon: "🔒",
-    title: "Vos images restent privées",
-    description: "Aucun stockage, aucune réutilisation. Vos créations vous appartiennent.",
-    badge: "Chiffrement SSL 256-bit"
+    title: "Confidentialité garantie",
+    description: "Suppression automatique, pas d'entraînement sur vos photos, chiffrement SSL. Vos images vous appartiennent.",
+    badge: "Suppression auto",
+    benefit: "Confiance"
   },
   {
-    icon: "📱",
-    title: "Tous formats supportés",
-    description: "PNG, JPG, WebP. Télécharge directement ou partage sur tes réseaux."
+    icon: "📐",
+    title: "Formats plateforme optimisés",
+    description: "Instagram, LinkedIn, Marketplaces. Formats automatiques avec recadrage intelligent pour chaque plateforme.",
+    benefit: "Polyvalence"
+  },
+  {
+    icon: "💎",
+    title: "Qualité professionnelle",
+    description: "Résultats HD/4K, détection automatique des visages, préservation des détails importants.",
+    benefit: "Qualité"
+  },
+  {
+    icon: "💰",
+    title: "Prix transparent",
+    description: "1 crédit = 1 transformation HD. Pas de surprise, pas d'engagement. Commencez gratuitement.",
+    benefit: "Transparence"
   }
 ];
 
@@ -30,21 +46,28 @@ export function FeaturesSection() {
           Pourquoi 2,847 créateurs nous font confiance
         </h2>
         <p className="text-xl text-white/70 max-w-3xl mx-auto">
-          Transforme tes images sans compétences techniques
+          Transformez vos photos sans compétences techniques. Résultats professionnels en quelques clics.
         </p>
       </div>
       
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
         {features.map((feature, index) => (
           <article 
             key={index}
             className="group rounded-2xl border border-white/10 bg-white/[0.04] p-8 shadow-[0_6px_24px_rgba(0,0,0,0.35)] ring-1 ring-white/5 transition will-change-transform hover:-translate-y-2 hover:ring-[#0099FF]/35"
           >
-            <div className="text-4xl mb-4">{feature.icon}</div>
-            <div className="mb-4 text-xl font-bold tracking-tight text-white">
-              {feature.title}
+            <div className="flex items-start gap-4 mb-4">
+              <div className="text-3xl">{feature.icon}</div>
+              <div className="flex-1">
+                <div className="text-lg font-bold tracking-tight text-white mb-2">
+                  {feature.title}
+                </div>
+                <div className="text-xs text-blue-400 font-medium mb-2">
+                  {feature.benefit}
+                </div>
+              </div>
             </div>
-            <p className="text-white/70 leading-relaxed">
+            <p className="text-white/70 leading-relaxed text-sm">
               {feature.description}
             </p>
             {feature.badge && (
