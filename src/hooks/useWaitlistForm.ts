@@ -29,9 +29,10 @@ export function useWaitlistForm() {
     if (!validateEmailClient(sanitizedEmail)) {
       setStatus("error");
       setMessage("Email invalide.");
-      trackEvent('form_validation_error', {
-        'event_category': 'engagement',
-        'event_label': 'waitlist_form'
+      trackEvent({
+        event: 'form_validation_error',
+        category: 'engagement',
+        label: 'waitlist_form'
       });
       logSecurityEvent('Invalid email format', { email: sanitizedEmail.substring(0, 3) + '***' });
       return;
@@ -41,9 +42,10 @@ export function useWaitlistForm() {
       setStatus("loading");
       setMessage("");
       
-      trackEvent('form_submit_start', {
-        'event_category': 'conversion',
-        'event_label': 'waitlist_form'
+      trackEvent({
+        event: 'form_submit_start',
+        category: 'conversion',
+        label: 'waitlist_form'
       });
       
       const res = await fetch("/api/waitlist", {
@@ -63,17 +65,19 @@ export function useWaitlistForm() {
       setShowToast(true);
       setEmail("");
       
-      trackEvent('conversion', {
-        'event_category': 'conversion',
-        'event_label': 'waitlist_signup',
-        'value': 1
+      trackEvent({
+        event: 'conversion',
+        category: 'conversion',
+        label: 'waitlist_signup',
+        value: 1
       });
       
       // Redirection vers la page du produit après 2 secondes
       setTimeout(() => {
-        trackEvent('redirect_to_product', {
-          'event_category': 'navigation',
-          'event_label': 'post_signup_redirect'
+        trackEvent({
+          event: 'redirect_to_product',
+          category: 'navigation',
+          label: 'post_signup_redirect'
         });
         router.push('/generate');
       }, 2000);
@@ -86,9 +90,10 @@ export function useWaitlistForm() {
         setMessage(fallback);
       }
       
-      trackEvent('form_submit_error', {
-        'event_category': 'error',
-        'event_label': 'waitlist_form'
+      trackEvent({
+        event: 'form_submit_error',
+        category: 'error',
+        label: 'waitlist_form'
       });
     }
   };
