@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",
+    "@vercel/speed-insights": "^1.2.0",
     "clsx": "^2.1.1",
     "lottie-web": "^5.13.0",
     "next": "15.5.4",
