@@ -2,11 +2,12 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ImageUpload } from "@/components/generate/ImageUpload";
-import { ImagePreview } from "@/components/generate/ImagePreview";
+import { EnhancedImagePreview } from "@/components/generate/EnhancedImagePreview";
 import { StylePresets } from "@/components/generate/StylePresets";
 import { PromptAssist } from "@/components/generate/PromptAssist";
 import { BatchVariants } from "@/components/generate/BatchVariants";
 import { BeforeAfterSlider } from "@/components/generate/BeforeAfterSlider";
+import { TrustCues } from "@/components/generate/TrustCues";
 import { useImageGeneration } from "@/hooks/useImageGeneration";
 
 export default function GeneratePage() {
@@ -22,7 +23,11 @@ export default function GeneratePage() {
     handleFileChange,
     handleSubmit,
     handleReset,
-    handleDownload
+    handleDownload,
+    handleRegenerate,
+    handleUndo,
+    generationHistory,
+    currentSeed
   } = useImageGeneration();
 
   // New state for enhanced UX
@@ -81,15 +86,26 @@ export default function GeneratePage() {
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
               Transform any image into on-brand visuals—in seconds
             </h1>
-            <p className="text-xl text-white/70 max-w-3xl mx-auto">
+            <p className="text-xl text-white/70 max-w-3xl mx-auto mb-6">
               Upload, choose a style or paste a prompt, and export platform-ready variants. 
               We never train on your images.
             </p>
+            
+            {/* Micro-onboarding avec exemples */}
+            <div className="bg-white/5 rounded-xl p-4 max-w-2xl mx-auto">
+              <div className="text-sm text-white/80 mb-2">💡 Quick start:</div>
+              <div className="text-xs text-white/60 space-y-1">
+                <div>1. Upload an image (PNG, JPG, WebP)</div>
+                <div>2. Choose a style preset or write a prompt</div>
+                <div>3. Click "Generate Now" and wait ~6-10 seconds</div>
+                <div>4. Download or copy your transformed image</div>
+              </div>
+            </div>
           </div>
 
           <div className="grid gap-8 lg:grid-cols-3">
-            {/* Left Panel - Controls */}
-            <div className="lg:col-span-1 space-y-6">
+            {/* Left Panel - Controls - Mobile first */}
+            <div className="lg:col-span-1 space-y-6 order-2 lg:order-1">
 
               {/* Image Upload */}
               <ImageUpload 
@@ -134,28 +150,75 @@ export default function GeneratePage() {
                 isGenerating={isGeneratingBatch}
               />
 
-              {/* Generate Button */}
-              <button 
-                type="button"
-                onClick={handleSubmit}
-                className="w-full btn-primary btn-lg" 
-                disabled={loading || !file || prompt.trim().length < 8}
-              >
-                {loading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> 
-                    Generating ~6-10s...
-                  </span>
-                ) : (
-                  "Generate Now"
-                )}
-              </button>
+              {/* Generate Button avec états visuels améliorés */}
+              <div className="space-y-3">
+                <button 
+                  type="button"
+                  onClick={handleSubmit}
+                  className={`w-full btn-lg transition-all duration-200 ${
+                    loading || !file || prompt.trim().length < 8
+                      ? 'btn-disabled opacity-50 cursor-not-allowed'
+                      : 'btn-primary hover:scale-105 shadow-lg hover:shadow-blue-500/25'
+                  }`}
+                  disabled={loading || !file || prompt.trim().length < 8}
+                  aria-describedby="generate-help"
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> 
+                      <span>Generating ~6-10s...</span>
+                    </span>
+                  ) : (
+                    <span className="flex items-center justify-center gap-2">
+                      <span>✨</span>
+                      <span>Generate Now</span>
+                    </span>
+                  )}
+                </button>
+                
+                {/* Help text pour validation */}
+                <div id="generate-help" className="text-xs text-white/60 text-center">
+                  {!file && "Upload an image to start"}
+                  {file && prompt.trim().length < 8 && "Write a prompt (min. 8 characters)"}
+                  {file && prompt.trim().length >= 8 && "Ready to generate!"}
+                </div>
+              </div>
 
-              {error && <div role="alert" className="text-red-300 text-sm">{error}</div>}
+              {/* Trust Cues & Feedback */}
+              <TrustCues 
+                loading={loading} 
+                resultUrl={resultUrl} 
+                error={error} 
+              />
+
+              {/* Secondary Actions après génération */}
+              {resultUrl && (
+                <div className="space-y-2">
+                  <div className="text-sm text-white/80 font-medium">Actions</div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={handleRegenerate}
+                      disabled={!currentSeed || loading}
+                      className="btn-secondary btn-sm"
+                    >
+                      🔄 Regenerate
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleUndo}
+                      disabled={generationHistory.length <= 1}
+                      className="btn-secondary btn-sm"
+                    >
+                      ↶ Undo
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Right Panel - Preview & Results */}
-            <div className="lg:col-span-2 space-y-6">
+            {/* Right Panel - Preview & Results - Mobile first */}
+            <div className="lg:col-span-2 space-y-6 order-1 lg:order-2">
               {/* Before/After Slider */}
               <BeforeAfterSlider
                 originalUrl={previewUrl}

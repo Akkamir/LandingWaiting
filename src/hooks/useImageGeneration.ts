@@ -8,6 +8,13 @@ export function useImageGeneration() {
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<"original" | "result" | "side">("original");
+  const [generationHistory, setGenerationHistory] = useState<Array<{
+    id: string;
+    prompt: string;
+    resultUrl: string;
+    timestamp: Date;
+  }>>([]);
+  const [currentSeed, setCurrentSeed] = useState<string | null>(null);
 
   const handleFileChange = useCallback((selectedFile: File | null) => {
     setError(null);
@@ -58,6 +65,20 @@ export function useImageGeneration() {
       
       setResultUrl(data.output_image_url);
       setView("result");
+      
+      // Store in history for undo functionality
+      const newGeneration = {
+        id: Date.now().toString(),
+        prompt,
+        resultUrl: data.output_image_url,
+        timestamp: new Date()
+      };
+      setGenerationHistory(prev => [newGeneration, ...prev.slice(0, 4)]); // Keep last 5
+      
+      // Store seed for regeneration
+      if (data.seed) {
+        setCurrentSeed(data.seed);
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Erreur inconnue";
       setError(message);
@@ -86,6 +107,46 @@ export function useImageGeneration() {
     }
   }, [resultUrl]);
 
+  // Regenerate with same seed
+  const handleRegenerate = useCallback(async () => {
+    if (!currentSeed || !file) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      formData.append("prompt", prompt);
+      formData.append("seed", currentSeed); // Use same seed for consistency
+      
+      const res = await fetch("/api/generate", { 
+        method: "POST", 
+        body: formData 
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Échec régénération");
+      
+      setResultUrl(data.output_image_url);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erreur inconnue";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentSeed, file, prompt]);
+
+  // Undo to previous generation
+  const handleUndo = useCallback(() => {
+    if (generationHistory.length > 1) {
+      const previous = generationHistory[1];
+      setResultUrl(previous.resultUrl);
+      setPrompt(previous.prompt);
+      setGenerationHistory(prev => prev.slice(1));
+    }
+  }, [generationHistory]);
+
   return {
     file,
     prompt,
@@ -98,6 +159,10 @@ export function useImageGeneration() {
     handleFileChange,
     handleSubmit,
     handleReset,
-    handleDownload
+    handleDownload,
+    handleRegenerate,
+    handleUndo,
+    generationHistory,
+    currentSeed
   };
 }
