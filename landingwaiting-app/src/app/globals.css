@@ -1,0 +1,142 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0B0B0C;
+  --card: rgba(255,255,255,0.06);
+  --muted: #c7c7c7;
+  --foreground: #ffffff;
+  --blue: #0099ff;
+  --blue-dark: #0055ff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-accent: var(--blue);
+  --color-accent-dark: var(--blue-dark);
+  --font-sans: var(--font-inter);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+.btn-primary { @apply inline-flex items-center justify-center rounded-full bg-white text-black px-6 py-3 font-semibold shadow-sm hover:bg-neutral-100 transition-colors transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black; }
+.btn-secondary { @apply inline-flex items-center justify-center rounded-full border border-white/15 bg-white/10 text-white px-6 py-3 font-medium hover:bg-white hover:text-black transition-colors transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black; }
+.btn-ghost { @apply inline-flex items-center justify-center rounded-full border border-white/10 bg-transparent text-white px-6 py-3 font-semibold hover:bg-white/5 transition-colors transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black; }
+.btn-sm { @apply px-4 py-2 text-sm; }
+.btn-lg { @apply px-7 py-3.5 text-base; }
+.btn-xl { @apply px-8 py-4 text-base md:text-lg; }
+
+.input { @apply w-full rounded-md bg-white/5 border border-white/10 px-4 py-3 text-base text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[color:var(--color-accent)]/50; }
+
+.card { @apply rounded-2xl border border-white/10 bg-white/[0.04] ring-1 ring-white/5 shadow-[0_8px_28px_rgba(0,0,0,0.35)]; }
+
+.container { @apply mx-auto max-w-screen-xl px-6 md:px-8; }
+
+.divider { @apply h-px bg-white/5 w-full; }
+
+.bg-app { background:
+  radial-gradient(1200px 600px at 10% -10%, rgba(0,153,255,0.12), transparent 60%),
+  radial-gradient(900px 500px at 90% -10%, rgba(0,85,255,0.10), transparent 60%),
+  var(--background);
+}
+.section-gradient { background: radial-gradient(80% 60% at 80% 0%, rgba(0,153,255,0.07), transparent), radial-gradient(60% 50% at 0% 20%, rgba(0,85,255,0.05), transparent); }
+
+/* Subtile grille animée */
+.grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse at center, rgba(0,0,0,0.15), transparent 60%);
+  pointer-events: none;
+}
+
+/* Halo animé du hero */
+.hero-glow {
+  position: absolute;
+  top: -160px;
+  right: -160px;
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(closest-side, rgba(0,153,255,0.18), rgba(0,85,255,0.08), transparent 70%);
+  filter: blur(10px);
+  animation: float 8s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); opacity: 1; }
+  50% { transform: translateY(8px); opacity: 0.9; }
+}
+
+.badge { @apply inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm ring-1 ring-white/10 px-3 py-1 text-sm text-white/80; }
+.badge:hover { @apply bg-white/10 border-white/20; }
+
+/* Marquee (défilement horizontal infini) */
+.marquee {
+  position: relative;
+  overflow: hidden;
+}
+.marquee__track {
+  display: flex;
+  gap: 16px;
+  width: max-content;
+  animation: marquee 26s linear infinite;
+}
+.marquee:hover .marquee__track { animation-play-state: paused; }
+/* Scroll reveal */
+.reveal { opacity: 0; transform: translateY(12px); transition: opacity .6s cubic-bezier(.22,1,.36,1), transform .6s cubic-bezier(.22,1,.36,1); }
+.reveal.reveal-in { opacity: 1; transform: translateY(0); }
+
+/* Tabs */
+.tabs { @apply flex items-center gap-2 flex-wrap; }
+.tab-pill { @apply rounded-full px-4 py-2 text-sm border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 transition; }
+.tab-pill[aria-selected="true"] { @apply bg-[color:var(--color-accent)] text-white border-transparent; }
+
+/* CTA final */
+.cta-gradient { background: linear-gradient(135deg, rgba(0,153,255,0.12), rgba(0,85,255,0.12)); }
+
+/* Utility for pointer magnet */
+.magnet { transition: transform .15s ease-out; will-change: transform; }
+
+/* Gradient border utility for Pro plan */
+.border-gradient {
+  position: relative;
+}
+.border-gradient::before {
+  content: "";
+  position: absolute; inset: 0; border-radius: 16px;
+  padding: 1px; background: linear-gradient(135deg, #0099ff, #0055ff);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+}
+/* Hover glow util */
+.hover-glow-blue { transition: transform .25s ease, box-shadow .25s ease; }
+.hover-glow-blue:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(0,153,255,0.35); }
+
+/* Input bar */
+.input-bar { @apply flex gap-2 bg-white/5 backdrop-blur-sm rounded-full p-2 border border-white/10; }
+.input-ghost { @apply flex-1 bg-transparent px-4 py-2 text-white placeholder-gray-400 focus:outline-none; }
+
+/* Reveal animation */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: none } }
+.reveal { animation: fadeUp .6s cubic-bezier(.22,1,.36,1) both; }
+@media (prefers-reduced-motion: reduce) { .reveal { animation: none } }
+
+/* Focus visible */
+:where(a,button,input,summary).focus-visible, :where(a,button,input,summary):focus-visible { outline: 0; box-shadow: 0 0 0 3px rgba(0,153,255,0.5); }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .marquee__track { animation: none; }
+  .hero-parallax { transform: none !important; }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
