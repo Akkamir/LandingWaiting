@@ -1,5 +1,42 @@
 @import "tailwindcss";
 
+/* Optimisation: CSS critique pour le rendu initial */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Optimisation: Prévention du layout shift avec des dimensions fixes pour les éléments critiques */
+.hero-title {
+  min-height: 1.2em; /* Prévention CLS */
+}
+
+.hero-subtitle {
+  min-height: 1.4em; /* Prévention CLS */
+}
+
+/* Optimisation: Conteneur avec dimensions stables */
+.lottie-container {
+  aspect-ratio: 16/9; /* Dimensions stables pour éviter CLS */
+  contain: layout style paint; /* Isolation pour optimiser le rendu */
+}
+
+/* Optimisation: Panneau de prévisualisation responsive */
+.preview-panel {
+  height: calc(100vh - 120px); /* Hauteur écran moins header */
+  max-height: 600px; /* Limite max pour les grands écrans */
+}
+
+@media (max-width: 768px) {
+  .preview-panel {
+    height: 50vh; /* Moitié d'écran sur mobile */
+    max-height: 400px;
+  }
+}
+
 :root {
   --background: #0B0B0C;
   --card: rgba(255,255,255,0.06);
@@ -24,9 +61,9 @@ body {
   font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
 }
 
-.btn-primary { @apply inline-flex items-center justify-center rounded-full bg-white text-black px-6 py-3 font-semibold shadow-sm hover:bg-neutral-100 transition-colors transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black; }
-.btn-secondary { @apply inline-flex items-center justify-center rounded-full border border-white/15 bg-white/10 text-white px-6 py-3 font-medium hover:bg-white hover:text-black transition-colors transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black; }
-.btn-ghost { @apply inline-flex items-center justify-center rounded-full border border-white/10 bg-transparent text-white px-6 py-3 font-semibold hover:bg-white/5 transition-colors transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black; }
+.btn-primary { @apply inline-flex items-center justify-center rounded-full bg-white text-black px-6 py-3 font-semibold shadow-sm hover:bg-neutral-100 transition-all hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black; }
+.btn-secondary { @apply inline-flex items-center justify-center rounded-full border border-white/15 bg-white/10 text-white px-6 py-3 font-medium hover:bg-white hover:text-black transition-all hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black; }
+.btn-ghost { @apply inline-flex items-center justify-center rounded-full border border-white/10 bg-transparent text-white px-6 py-3 font-semibold hover:bg-white/5 transition-all hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black; }
 .btn-sm { @apply px-4 py-2 text-sm; }
 .btn-lg { @apply px-7 py-3.5 text-base; }
 .btn-xl { @apply px-8 py-4 text-base md:text-lg; }
@@ -88,9 +125,18 @@ body {
   animation: marquee 26s linear infinite;
 }
 .marquee:hover .marquee__track { animation-play-state: paused; }
-/* Scroll reveal */
-.reveal { opacity: 0; transform: translateY(12px); transition: opacity .6s cubic-bezier(.22,1,.36,1), transform .6s cubic-bezier(.22,1,.36,1); }
-.reveal.reveal-in { opacity: 1; transform: translateY(0); }
+/* Optimisation: Scroll reveal avec GPU acceleration et will-change dynamique */
+.reveal { 
+  opacity: 0; 
+  transform: translateY(12px); 
+  transition: opacity .6s cubic-bezier(.22,1,.36,1), transform .6s cubic-bezier(.22,1,.36,1);
+  /* will-change sera ajouté dynamiquement par JS quand l'élément devient visible */
+}
+.reveal.reveal-in { 
+  opacity: 1; 
+  transform: translateY(0); 
+  will-change: auto; /* Retire will-change après animation */
+}
 
 /* Tabs */
 .tabs { @apply flex items-center gap-2 flex-wrap; }
@@ -100,8 +146,11 @@ body {
 /* CTA final */
 .cta-gradient { background: linear-gradient(135deg, rgba(0,153,255,0.12), rgba(0,85,255,0.12)); }
 
-/* Utility for pointer magnet */
-.magnet { transition: transform .15s ease-out; will-change: transform; }
+/* Optimisation: will-change seulement quand nécessaire pour éviter les reflows */
+.magnet { 
+  transition: transform .15s ease-out; 
+  /* will-change retiré - sera ajouté dynamiquement via JS */
+}
 
 /* Gradient border utility for Pro plan */
 .border-gradient {
@@ -119,8 +168,8 @@ body {
 .hover-glow-blue:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(0,153,255,0.35); }
 
 /* Input bar */
-.input-bar { @apply flex gap-2 bg-white/5 backdrop-blur-sm rounded-full p-2 border border-white/10; }
-.input-ghost { @apply flex-1 bg-transparent px-4 py-2 text-white placeholder-gray-400 focus:outline-none; }
+.input-bar { @apply flex items-center gap-2 bg-white/5 backdrop-blur-sm rounded-full p-2 border border-white/10; }
+.input-ghost { @apply flex-1 min-w-0 bg-transparent px-4 py-2 text-white placeholder-gray-400 focus:outline-none; }
 
 /* Reveal animation */
 @keyframes fadeUp { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: none } }

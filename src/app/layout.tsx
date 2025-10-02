@@ -2,14 +2,24 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
+// Optimisation: Preload de la police critique
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap", // Optimise le chargement de la police
+  preload: true,
 });
 
-export const metadata: Metadata = {
-  title: "ChroniQuest — Build better focus habits",
-  description: "Un outil de focus simple et élégant. Rejoins la liste d’attente.",
+        export const metadata: Metadata = {
+          title: "ImageAI — Transforme tes images avec l'IA",
+          description: "L'outil IA qui transforme tes photos avec un simple prompt. Aucune compétence technique requise.",
+        };
+
+// Optimisation: Viewport séparé pour éviter les warnings
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#0B0B0C",
 };
 
 export default function RootLayout({
@@ -18,8 +28,31 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr">
-      <body className={`${inter.variable} antialiased bg-app`}>
+    <html lang="fr" className={inter.variable}>
+      <head>
+        {/* Optimisation: Preload des assets critiques */}
+        <link rel="preload" href="/Bouncing Square.json" as="fetch" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="//fonts.gstatic.com" />
+        {/* Favicon pour éviter l'erreur 500 */}
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>" />
+        {/* Anti-FOUC: CSS critique inline */}
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            body { 
+              background: #0B0B0C; 
+              color: #ffffff; 
+              font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+              margin: 0;
+              padding: 0;
+            }
+            .hero-title { min-height: 1.2em; }
+            .hero-subtitle { min-height: 1.4em; }
+            .lottie-container { aspect-ratio: 16/9; contain: layout style paint; }
+          `
+        }} />
+      </head>
+      <body className="antialiased bg-app">
         {children}
       </body>
     </html>
