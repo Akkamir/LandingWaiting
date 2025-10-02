@@ -1,6 +1,14 @@
 import Image from "next/image";
 
-export default function Hero() {
+type HeroProps = {
+  email: string;
+  status: "idle" | "loading" | "success" | "error";
+  message: string;
+  onEmailChange: (value: string) => void;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+};
+
+export default function Hero({ email, status, message, onEmailChange, onSubmit }: HeroProps) {
   return (
     <section id="hero" className="container py-20 md:py-28">
       <div className="grid gap-8 md:grid-cols-2 items-center">
@@ -11,15 +19,41 @@ export default function Hero() {
           <p className="mt-4 text-white/70 max-w-prose">
             Construis de meilleures habitudes de focus avec une app simple et élégante.
           </p>
+          <form className="input-bar mt-6" onSubmit={onSubmit}>
+            <input
+              type="email"
+              className="input-ghost"
+              placeholder="Ton email pour la liste d’attente"
+              value={email}
+              onChange={(e) => onEmailChange(e.target.value)}
+              disabled={status === "loading"}
+              aria-label="Adresse e-mail"
+              required
+            />
+            <button
+              type="submit"
+              className="btn-primary btn-lg"
+              disabled={status === "loading"}
+            >
+              {status === "loading" ? "Inscription…" : "Rejoindre la liste"}
+            </button>
+          </form>
+          {message && (
+            <div
+              role="status"
+              className={`mt-2 text-sm ${status === "error" ? "text-red-300" : "text-green-300"}`}
+            >
+              {message}
+            </div>
+          )}
         </div>
-        <div className="relative aspect-video rounded-xl bg-white/[0.04] ring-1 ring-white/10 card" aria-hidden>
-          <Image
-            src="/next.svg"
-            alt="aperçu"
-            fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            style={{ objectFit: "contain", padding: 24 }}
-            priority
+        <div className="relative aspect-video rounded-xl bg-white/[0.04] ring-1 ring-white/10 card flex items-center justify-center overflow-hidden" aria-hidden>
+          <lottie-player
+            autoplay
+            loop
+            mode="normal"
+            src="/Bouncing Square.json"
+            style={{ width: "100%", height: "100%" }}
           />
         </div>
       </div>

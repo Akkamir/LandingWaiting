@@ -123,7 +123,13 @@ export default function Home() {
       </header>
 
       <main className="flex-1">
-        <Hero />
+        <Hero
+          email={email}
+          status={status}
+          message={message}
+          onEmailChange={setEmail}
+          onSubmit={handleJoin}
+        />
 
         {/* Features */}
         <section id="features" className="container py-20 md:py-28">
