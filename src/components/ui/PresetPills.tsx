@@ -66,6 +66,7 @@ export function PresetPills({ onPresetSelect, selectedPreset, className = "" }: 
         {presets.map((preset) => (
           <button
             key={preset.id}
+            type="button"
             onClick={() => onPresetSelect(preset)}
             className={`p-4 rounded-xl border-2 transition-all duration-200 text-left ${
               selectedPreset === preset.id

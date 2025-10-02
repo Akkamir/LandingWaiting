@@ -72,6 +72,7 @@ export function PlatformSizePresets({ onSizeSelect, selectedSize, className = ""
         {sizePresets.map((preset) => (
           <button
             key={preset.id}
+            type="button"
             onClick={() => onSizeSelect(preset)}
             className={`p-3 rounded-lg border transition-all duration-200 text-left ${
               selectedSize === preset.id
