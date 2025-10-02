@@ -49,8 +49,8 @@ export default function GeneratePage() {
           <Link href="/" className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 transition hover:bg-white hover:text-black focus-visible:ring-2 focus-visible:ring-white/40">← Retour à la landing</Link>
         </div>
       </header>
-    <section className="h-screen section-gradient overflow-hidden">
-      <div className="container h-full py-6 md:py-8 grid gap-6 md:grid-cols-2 items-stretch">
+    <section className="min-h-screen section-gradient">
+      <div className="container py-6 md:py-8 grid gap-8 lg:grid-cols-2 items-start">
         <div>
           <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">Génération d&apos;image IA</h1>
           <p className="mt-2 text-white/70">Transforme ton image avec un prompt.
@@ -155,13 +155,13 @@ export default function GeneratePage() {
           {error && <div role="alert" className="mt-4 text-red-300 text-sm">{error}</div>}
         </div>
 
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col">
           <div className="mb-3 flex gap-2 flex-shrink-0">
             <button className="tab-pill" aria-selected={view==='original'} onClick={() => setView('original')}>Original</button>
             <button className="tab-pill" aria-selected={view==='result'} onClick={() => setView('result')}>Résultat</button>
             <button className="tab-pill" aria-selected={view==='side'} onClick={() => setView('side')}>Côte à côte</button>
           </div>
-                      <div className="card overflow-hidden rounded-2xl w-full flex-1 flex items-center justify-center min-h-0 preview-panel">
+          <div className="card overflow-hidden rounded-2xl w-full h-80 md:h-96 lg:h-[500px] flex items-center justify-center preview-panel">
                         {view === "side" && previewUrl && resultUrl ? (
                           <BeforeAfterSlider
                             beforeImage={previewUrl}
