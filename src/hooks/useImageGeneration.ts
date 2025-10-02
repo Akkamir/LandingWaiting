@@ -75,14 +75,39 @@ export function useImageGeneration() {
     setView("original");
   }, []);
 
-  const handleDownload = useCallback(() => {
-    if (resultUrl) {
+  const handleDownload = useCallback(async () => {
+    if (!resultUrl) return;
+    
+    try {
+      // Récupérer le fichier depuis l'URL
+      const response = await fetch(resultUrl);
+      if (!response.ok) throw new Error('Erreur lors du téléchargement');
+      
+      // Créer un blob à partir de la réponse
+      const blob = await response.blob();
+      
+      // Créer un lien de téléchargement avec le blob
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = resultUrl;
-      link.download = 'generated-image.jpg';
+      link.href = url;
+      
+      // Déterminer l'extension du fichier
+      const extension = resultUrl.includes('.png') ? 'png' : 
+                       resultUrl.includes('.jpg') || resultUrl.includes('.jpeg') ? 'jpg' : 'png';
+      
+      link.download = `image-generee-${Date.now()}.${extension}`;
+      
+      // Déclencher le téléchargement
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      
+      // Nettoyer l'URL du blob
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Erreur lors du téléchargement:', error);
+      // Fallback: ouvrir dans un nouvel onglet
+      window.open(resultUrl, '_blank');
     }
   }, [resultUrl]);
 
