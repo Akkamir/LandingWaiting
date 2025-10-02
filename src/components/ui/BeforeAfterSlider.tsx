@@ -26,7 +26,11 @@ export function BeforeAfterSlider({
     const rect = containerRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const percentage = (x / rect.width) * 100;
-    setSliderPosition(Math.max(0, Math.min(100, percentage)));
+    
+    // Limiter le slider aux limites de l'image (éviter de glisser au-delà)
+    const minPosition = 5;  // 5% minimum
+    const maxPosition = 95;  // 95% maximum
+    setSliderPosition(Math.max(minPosition, Math.min(maxPosition, percentage)));
   };
 
   const handleMouseDown = () => {
@@ -44,7 +48,11 @@ export function BeforeAfterSlider({
       const rect = containerRef.current.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const percentage = (x / rect.width) * 100;
-      setSliderPosition(Math.max(0, Math.min(100, percentage)));
+      
+      // Limiter le slider aux limites de l'image (éviter de glisser au-delà)
+      const minPosition = 5;  // 5% minimum
+      const maxPosition = 95;  // 95% maximum
+      setSliderPosition(Math.max(minPosition, Math.min(maxPosition, percentage)));
     };
 
     const handleGlobalMouseUp = () => {
@@ -75,29 +83,31 @@ export function BeforeAfterSlider({
         onSelectStart={(e) => e.preventDefault()}
       >
         {/* Image "Après" (arrière-plan) */}
-        <div className="absolute inset-0 w-full h-full select-none flex items-center justify-center" style={{ userSelect: 'none' }}>
+        <div className="absolute inset-0 w-full h-full select-none" style={{ userSelect: 'none' }}>
           <Image
             src={afterImage}
             alt="Image transformée"
             fill
-            className="object-contain pointer-events-none"
+            className="object-cover pointer-events-none"
             sizes="(max-width: 768px) 100vw, 50vw"
             draggable={false}
+            style={{ objectFit: 'cover' }}
           />
         </div>
 
         {/* Image "Avant" (premier plan avec masque) */}
         <div 
-          className="absolute inset-0 w-full h-full overflow-hidden select-none flex items-center justify-center"
+          className="absolute inset-0 w-full h-full overflow-hidden select-none"
           style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)`, userSelect: 'none' }}
         >
           <Image
             src={beforeImage}
             alt="Image originale"
             fill
-            className="object-contain pointer-events-none"
+            className="object-cover pointer-events-none"
             sizes="(max-width: 768px) 100vw, 50vw"
             draggable={false}
+            style={{ objectFit: 'cover' }}
           />
         </div>
 
