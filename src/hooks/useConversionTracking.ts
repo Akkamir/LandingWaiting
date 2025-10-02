@@ -32,8 +32,8 @@ interface ConversionTrackingOptions {
 export function useConversionTracking() {
   const trackEvent = (options: ConversionTrackingOptions) => {
     // Google Analytics 4
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', options.event, {
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      (window as any).gtag('event', options.event, {
         event_category: 'conversion',
         event_label: options.event,
         value: options.value,
