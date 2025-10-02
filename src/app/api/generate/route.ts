@@ -189,11 +189,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Aucune image générée" }, { status: 500 });
     }
     
+    console.log("[GENERATE] Output URL from Replicate:", { outputUrl });
+    
     // Validation de l'URL de sortie
     if (!isValidUrl(outputUrl)) {
-      console.error("[SECURITY] Invalid output URL from Replicate:", { outputUrl, ip });
+      console.error("[SECURITY] Invalid output URL from Replicate:", { 
+        outputUrl, 
+        ip,
+        hostname: new URL(outputUrl).hostname,
+        protocol: new URL(outputUrl).protocol
+      });
       return NextResponse.json({ error: "URL de sortie invalide" }, { status: 500 });
     }
+    
+    console.log("[GENERATE] Output URL validated successfully");
 
     // Télécharger l'image générée puis uploader dans output-images
     const genRes = await fetch(outputUrl);

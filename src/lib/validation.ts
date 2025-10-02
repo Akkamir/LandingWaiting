@@ -74,6 +74,7 @@ export function isValidUrl(url: string): boolean {
     const allowedProtocols = ['https:'];
     const allowedHosts = [
       'replicate.com',
+      'replicate.delivery', // URLs de sortie Replicate
       'storage.googleapis.com',
       'supabase.co', // Domaines Supabase
       'supabase.in', // Domaines Supabase alternatifs
