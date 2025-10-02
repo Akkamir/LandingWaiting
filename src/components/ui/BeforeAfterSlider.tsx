@@ -71,7 +71,7 @@ export function BeforeAfterSlider({
   }, [isDragging]);
 
   return (
-    <div className={`relative w-full h-64 md:h-80 rounded-xl overflow-hidden ${className}`}>
+    <div className={`relative w-full h-80 md:h-96 lg:h-[500px] rounded-xl overflow-hidden ${className}`}>
       <div 
         ref={containerRef}
         className="relative w-full h-full cursor-col-resize select-none"
@@ -88,10 +88,13 @@ export function BeforeAfterSlider({
             src={afterImage}
             alt="Image transformée"
             fill
-            className="object-cover pointer-events-none"
+            className="pointer-events-none"
             sizes="(max-width: 768px) 100vw, 50vw"
             draggable={false}
-            style={{ objectFit: 'cover' }}
+            style={{ 
+              objectFit: 'contain',
+              objectPosition: 'center center'
+            }}
           />
         </div>
 
@@ -104,10 +107,13 @@ export function BeforeAfterSlider({
             src={beforeImage}
             alt="Image originale"
             fill
-            className="object-cover pointer-events-none"
+            className="pointer-events-none"
             sizes="(max-width: 768px) 100vw, 50vw"
             draggable={false}
-            style={{ objectFit: 'cover' }}
+            style={{ 
+              objectFit: 'contain',
+              objectPosition: 'center center'
+            }}
           />
         </div>
 
