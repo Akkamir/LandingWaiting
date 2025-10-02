@@ -129,11 +129,20 @@ export async function POST(req: NextRequest) {
     const { data: pubInput } = supabase.storage.from("input-images").getPublicUrl(inputPath);
     const inputUrl = pubInput.publicUrl;
     
+    console.log("[GENERATE] Input URL generated:", { inputUrl, path: inputPath });
+    
     // Validation de l'URL générée
     if (!isValidUrl(inputUrl)) {
-      console.error("[SECURITY] Invalid input URL generated:", { inputUrl, ip });
+      console.error("[SECURITY] Invalid input URL generated:", { 
+        inputUrl, 
+        ip,
+        hostname: new URL(inputUrl).hostname,
+        protocol: new URL(inputUrl).protocol
+      });
       return NextResponse.json({ error: "Erreur de traitement" }, { status: 500 });
     }
+    
+    console.log("[GENERATE] Input URL validated successfully");
 
     // Appel sécurisé à Replicate
     const replicate = new Replicate({ auth: env.REPLICATE_API_TOKEN });
