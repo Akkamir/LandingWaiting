@@ -75,12 +75,12 @@ export function BeforeAfterSlider({
         onSelectStart={(e) => e.preventDefault()}
       >
         {/* Image "Après" (arrière-plan) */}
-        <div className="absolute inset-0 w-full h-full select-none" style={{ userSelect: 'none' }}>
+        <div className="absolute inset-0 w-full h-full select-none flex items-center justify-center" style={{ userSelect: 'none' }}>
           <Image
             src={afterImage}
             alt="Image transformée"
             fill
-            className="object-cover pointer-events-none"
+            className="object-contain pointer-events-none"
             sizes="(max-width: 768px) 100vw, 50vw"
             draggable={false}
           />
@@ -88,14 +88,14 @@ export function BeforeAfterSlider({
 
         {/* Image "Avant" (premier plan avec masque) */}
         <div 
-          className="absolute inset-0 w-full h-full overflow-hidden select-none"
+          className="absolute inset-0 w-full h-full overflow-hidden select-none flex items-center justify-center"
           style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)`, userSelect: 'none' }}
         >
           <Image
             src={beforeImage}
             alt="Image originale"
             fill
-            className="object-cover pointer-events-none"
+            className="object-contain pointer-events-none"
             sizes="(max-width: 768px) 100vw, 50vw"
             draggable={false}
           />
