@@ -12,10 +12,11 @@ export function usePerformance() {
       const entries = list.getEntries();
       const lastEntry = entries[entries.length - 1];
       if (lastEntry) {
-        trackEvent('web_vitals', {
-          'event_category': 'performance',
-          'event_label': 'LCP',
-          'value': Math.round(lastEntry.startTime)
+        trackEvent({
+          event: 'web_vitals',
+          category: 'performance',
+          label: 'LCP',
+          value: Math.round(lastEntry.startTime)
         });
       }
     });
@@ -34,10 +35,11 @@ export function usePerformance() {
       entries.forEach((entry) => {
         if (entry.entryType === 'first-input') {
           const eventEntry = entry as any; // PerformanceEventTiming
-          trackEvent('web_vitals', {
-            'event_category': 'performance',
-            'event_label': 'FID',
-            'value': Math.round(eventEntry.processingStart - eventEntry.startTime)
+          trackEvent({
+            event: 'web_vitals',
+            category: 'performance',
+            label: 'FID',
+            value: Math.round(eventEntry.processingStart - eventEntry.startTime)
           });
         }
       });
