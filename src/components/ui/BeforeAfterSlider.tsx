@@ -66,56 +66,61 @@ export function BeforeAfterSlider({
     <div className={`relative w-full h-64 md:h-80 rounded-xl overflow-hidden ${className}`}>
       <div 
         ref={containerRef}
-        className="relative w-full h-full cursor-col-resize"
+        className="relative w-full h-full cursor-col-resize select-none"
+        style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none', msUserSelect: 'none' }}
         onMouseMove={handleMouseMove}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
+        onDragStart={(e) => e.preventDefault()}
+        onSelectStart={(e) => e.preventDefault()}
       >
         {/* Image "Après" (arrière-plan) */}
-        <div className="absolute inset-0 w-full h-full">
+        <div className="absolute inset-0 w-full h-full select-none" style={{ userSelect: 'none' }}>
           <Image
             src={afterImage}
             alt="Image transformée"
             fill
-            className="object-cover"
+            className="object-cover pointer-events-none"
             sizes="(max-width: 768px) 100vw, 50vw"
+            draggable={false}
           />
         </div>
 
         {/* Image "Avant" (premier plan avec masque) */}
         <div 
-          className="absolute inset-0 w-full h-full overflow-hidden"
-          style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
+          className="absolute inset-0 w-full h-full overflow-hidden select-none"
+          style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)`, userSelect: 'none' }}
         >
           <Image
             src={beforeImage}
             alt="Image originale"
             fill
-            className="object-cover"
+            className="object-cover pointer-events-none"
             sizes="(max-width: 768px) 100vw, 50vw"
+            draggable={false}
           />
         </div>
 
         {/* Curseur de contrôle */}
         <div 
-          className="absolute top-0 bottom-0 w-1 bg-white shadow-lg z-10"
-          style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
+          className="absolute top-0 bottom-0 w-1 bg-white shadow-lg z-10 select-none pointer-events-none"
+          style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)', userSelect: 'none' }}
         >
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center">
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center pointer-events-none">
             <div className="w-4 h-4 bg-gray-800 rounded-full"></div>
           </div>
         </div>
 
         {/* Labels */}
-        <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-sm rounded-lg px-3 py-1 text-white text-sm font-medium">
+        <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-sm rounded-lg px-3 py-1 text-white text-sm font-medium select-none pointer-events-none" style={{ userSelect: 'none' }}>
           {beforeLabel}
         </div>
-        <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm rounded-lg px-3 py-1 text-white text-sm font-medium">
+        <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm rounded-lg px-3 py-1 text-white text-sm font-medium select-none pointer-events-none" style={{ userSelect: 'none' }}>
           {afterLabel}
         </div>
 
         {/* Instructions */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-sm rounded-lg px-4 py-2 text-white text-sm">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-sm rounded-lg px-4 py-2 text-white text-sm select-none pointer-events-none" style={{ userSelect: 'none' }}>
           Glissez pour comparer
         </div>
       </div>
