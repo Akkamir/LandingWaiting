@@ -80,7 +80,6 @@ export function BeforeAfterSlider({
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
         onDragStart={(e) => e.preventDefault()}
-        onSelectStart={(e) => e.preventDefault()}
       >
         {/* Image "Après" (arrière-plan) */}
         <div className="absolute inset-0 w-full h-full select-none" style={{ userSelect: 'none' }}>
