@@ -57,7 +57,7 @@ const securityHeaders = {
 // Rate limiting simple (en production, utiliser Redis ou similaire)
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
-const RATE_LIMIT_MAX_REQUESTS = 10; // 10 requêtes par minute
+const RATE_LIMIT_MAX_REQUESTS = 30; // 30 requêtes par minute (plus généreux pour le développement)
 
 function checkRateLimit(ip: string): boolean {
   const now = Date.now();
@@ -120,8 +120,8 @@ export function middleware(request: NextRequest) {
     return new NextResponse('Forbidden', { status: 403 });
   }
   
-  // Rate limiting pour les API
-  if (pathname.startsWith('/api/')) {
+  // Rate limiting pour les API (désactivé en développement)
+  if (pathname.startsWith('/api/') && process.env.NODE_ENV === 'production') {
     if (!checkRateLimit(ip)) {
       console.warn(`[SECURITY] Rate limit exceeded for ${ip}`);
       return new NextResponse('Too Many Requests', { status: 429 });

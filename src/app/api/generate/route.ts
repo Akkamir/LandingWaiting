@@ -67,6 +67,8 @@ export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
   const projectId = randomUUID();
   
+  console.log("[GENERATE] Starting generation request", { ip, projectId, timestamp: new Date().toISOString() });
+  
   try {
     // Validation de l'environnement
     const env = validateEnvironment();
@@ -74,6 +76,8 @@ export async function POST(req: NextRequest) {
       console.error("[SECURITY] Environment validation failed");
       return NextResponse.json({ error: "Service temporairement indisponible" }, { status: 503 });
     }
+    
+    console.log("[GENERATE] Environment validated successfully");
     
     const supabase = getSupabaseAdmin();
     if (!supabase) {
@@ -231,8 +235,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `DB insert: ${insertErr.message}`, errorId }, { status: 400 });
     }
 
+    console.log("[GENERATE] Generation completed successfully", { 
+      projectId, 
+      outputUrl: storedOutputUrl,
+      processingTime: Date.now() - startTime 
+    });
+    
     return NextResponse.json({ output_image_url: storedOutputUrl });
-  } catch {
+  } catch (error) {
+    console.error("[GENERATE] Unexpected error:", {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      ip,
+      projectId,
+      timestamp: new Date().toISOString()
+    });
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }
