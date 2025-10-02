@@ -8,7 +8,6 @@ import { PlatformSizePresets, type SizePreset } from "@/components/ui/PlatformSi
 import { PrivacyControls, type PrivacySettings } from "@/components/ui/PrivacyControls";
 import { BeforeAfterSlider } from "@/components/ui/BeforeAfterSlider";
 import { useImageGeneration } from "@/hooks/useImageGeneration";
-import NoSSR from "@/components/NoSSR";
 
 export default function GeneratePage() {
   const {
@@ -43,14 +42,14 @@ export default function GeneratePage() {
   }, [previewUrl]);
 
   return (
-    <NoSSR>
+    <>
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-md">
         <div className="container py-3 flex items-center justify-between">
-                  <Link href="/" className="font-semibold tracking-tight">ImageAI</Link>
+          <Link href="/" className="font-semibold tracking-tight">ImageAI</Link>
           <Link href="/" className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 transition hover:bg-white hover:text-black focus-visible:ring-2 focus-visible:ring-white/40">← Retour à la landing</Link>
         </div>
       </header>
-    <section className="min-h-screen section-gradient">
+      <section className="min-h-screen section-gradient">
       <div className="container py-6 md:py-8 grid gap-8 lg:grid-cols-2 items-start">
         <div>
           <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">Génération d&apos;image IA</h1>
@@ -162,7 +161,7 @@ export default function GeneratePage() {
             <button className="tab-pill" aria-selected={view==='result'} onClick={() => setView('result')}>Résultat</button>
             <button className="tab-pill" aria-selected={view==='side'} onClick={() => setView('side')}>Côte à côte</button>
           </div>
-          <div className="card overflow-hidden rounded-2xl w-full h-80 md:h-96 lg:h-[500px] preview-panel relative">
+          <div className="card overflow-hidden rounded-2xl w-full h-80 md:h-96 lg:h-[500px] relative">
                         {view === "side" && previewUrl && resultUrl ? (
                           <BeforeAfterSlider
                             beforeImage={previewUrl}
@@ -182,8 +181,8 @@ export default function GeneratePage() {
                       </div>
         </div>
       </div>
-    </section>
-    </NoSSR>
+      </section>
+    </>
   );
 }
 
