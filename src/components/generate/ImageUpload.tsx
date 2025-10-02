@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { validateImageFile, formatFileSize } from "@/lib/utils";
+import { clientRateLimit, logSecurityEvent } from "@/lib/security";
 
 interface ImageUploadProps {
   file: File | null;
@@ -16,11 +17,32 @@ export function ImageUpload({ file, onFileChange, error }: ImageUploadProps) {
       return;
     }
 
-    const validation = validateImageFile(selectedFile);
-    if (!validation.valid) {
-      // Handle error in parent component
+    // Rate limiting pour les uploads
+    if (!clientRateLimit.isAllowed('image-upload')) {
+      logSecurityEvent('Upload rate limit exceeded', { 
+        fileName: selectedFile.name.substring(0, 10) + '***',
+        fileSize: selectedFile.size 
+      });
       return;
     }
+
+    const validation = validateImageFile(selectedFile);
+    if (!validation.valid) {
+      logSecurityEvent('Invalid file upload attempt', { 
+        fileName: selectedFile.name.substring(0, 10) + '***',
+        fileType: selectedFile.type,
+        fileSize: selectedFile.size,
+        error: validation.error
+      });
+      return;
+    }
+
+    // Log sécurisé de l'upload
+    logSecurityEvent('File upload initiated', { 
+      fileName: selectedFile.name.substring(0, 10) + '***',
+      fileType: selectedFile.type,
+      fileSize: selectedFile.size
+    });
 
     onFileChange(selectedFile);
   }, [onFileChange]);

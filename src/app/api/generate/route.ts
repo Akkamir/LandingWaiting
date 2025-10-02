@@ -2,15 +2,49 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import Replicate from "replicate";
 import { randomUUID } from "crypto";
+import { validateInput, promptSchema, imageFileSchema, isValidUrl } from "@/lib/validation";
 
-const SUPABASE_URL = process.env.SUPABASE_URL as string | undefined;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as string | undefined;
-const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN as string | undefined;
-const REPLICATE_MODEL = process.env.REPLICATE_MODEL as string | undefined;
+// Validation sécurisée des variables d'environnement
+function validateEnvironment() {
+  const required = {
+    SUPABASE_URL: process.env.SUPABASE_URL,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    REPLICATE_API_TOKEN: process.env.REPLICATE_API_TOKEN,
+    REPLICATE_MODEL: process.env.REPLICATE_MODEL
+  };
+  
+  const missing = Object.entries(required)
+    .filter(([_, value]) => !value)
+    .map(([key]) => key);
+    
+  if (missing.length > 0) {
+    console.error("[SECURITY] Variables d'environnement manquantes:", missing);
+    return null;
+  }
+  
+  // Validation de l'URL Supabase
+  try {
+    new URL(required.SUPABASE_URL!);
+  } catch {
+    console.error("[SECURITY] URL Supabase invalide");
+    return null;
+  }
+  
+  return required as Required<typeof required>;
+}
 
 function getSupabaseAdmin() {
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) return null;
-  return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
+  const env = validateEnvironment();
+  if (!env) return null;
+  
+  return createClient(env.SUPABASE_URL!, env.SUPABASE_SERVICE_ROLE_KEY!, { 
+    auth: { persistSession: false },
+    global: {
+      headers: {
+        'X-Client-Info': 'imageai-generate-api'
+      }
+    }
+  });
 }
 
 function extractReplicateUrl(output: unknown): string | null {
@@ -29,59 +63,87 @@ function extractReplicateUrl(output: unknown): string | null {
 }
 
 export async function POST(req: NextRequest) {
+  const startTime = Date.now();
+  const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+  const projectId = randomUUID();
+  
   try {
+    // Validation de l'environnement
+    const env = validateEnvironment();
+    if (!env) {
+      console.error("[SECURITY] Environment validation failed");
+      return NextResponse.json({ error: "Service temporairement indisponible" }, { status: 503 });
+    }
+    
     const supabase = getSupabaseAdmin();
     if (!supabase) {
-      return NextResponse.json({ error: "Supabase non configuré" }, { status: 500 });
-    }
-    if (!REPLICATE_API_TOKEN || !REPLICATE_MODEL) {
-      return NextResponse.json({ error: "Replicate non configuré" }, { status: 500 });
+      console.error("[SECURITY] Supabase initialization failed");
+      return NextResponse.json({ error: "Service temporairement indisponible" }, { status: 503 });
     }
 
+    // Validation sécurisée des données d'entrée
     const formData = await req.formData();
-    const prompt = (formData.get("prompt") as string | null)?.toString() || "";
+    const prompt = formData.get("prompt") as string | null;
     const file = formData.get("image") as File | null;
-    if (!file) {
-      return NextResponse.json({ error: "Aucune image reçue" }, { status: 400 });
+    
+    // Validation du prompt
+    const promptValidation = validateInput(promptSchema, prompt);
+    if (!promptValidation.success) {
+      console.warn(`[SECURITY] Invalid prompt from ${ip}:`, promptValidation.error);
+      return NextResponse.json({ error: "Prompt invalide" }, { status: 400 });
     }
-    if (!prompt.trim()) {
-      return NextResponse.json({ error: "Prompt requis" }, { status: 400 });
+    
+    // Validation du fichier
+    const fileValidation = validateInput(imageFileSchema, file);
+    if (!fileValidation.success) {
+      console.warn(`[SECURITY] Invalid file from ${ip}:`, fileValidation.error);
+      return NextResponse.json({ error: "Fichier invalide" }, { status: 400 });
     }
+    
+    const validatedPrompt = promptValidation.data;
+    const validatedFile = fileValidation.data;
 
-    const projectId = randomUUID();
-
-    // Upload image d'entrée
-    const bytes = Buffer.from(await file.arrayBuffer());
-    const inputPath = `projects/${projectId}/input-${Date.now()}.png`;
+    // Upload sécurisé de l'image d'entrée
+    const bytes = Buffer.from(await validatedFile.arrayBuffer());
+    const inputPath = `projects/${projectId}/input-${Date.now()}.${validatedFile.type.split('/')[1] || 'png'}`;
+    
     const { error: upErr } = await supabase.storage.from("input-images").upload(inputPath, bytes, {
-      contentType: file.type || "image/png",
+      contentType: validatedFile.type,
       upsert: false,
     });
+    
     if (upErr) {
-      const errorId = randomUUID();
-      console.error("[generate] Upload input error", {
-        errorId,
-        path: inputPath,
-        size: bytes.byteLength,
-        contentType: file.type,
-        message: upErr.message,
+      console.error("[SECURITY] Upload input error:", {
+        error: upErr.message,
+        ip,
+        projectId,
+        timestamp: new Date().toISOString()
       });
-      return NextResponse.json({ error: `Upload input: ${upErr.message}`, errorId }, { status: 400 });
+      return NextResponse.json({ error: "Erreur d'upload" }, { status: 500 });
     }
+    
     const { data: pubInput } = supabase.storage.from("input-images").getPublicUrl(inputPath);
     const inputUrl = pubInput.publicUrl;
+    
+    // Validation de l'URL générée
+    if (!isValidUrl(inputUrl)) {
+      console.error("[SECURITY] Invalid input URL generated:", { inputUrl, ip });
+      return NextResponse.json({ error: "Erreur de traitement" }, { status: 500 });
+    }
 
-    // Appel Replicate
-    const replicate = new Replicate({ auth: REPLICATE_API_TOKEN });
+    // Appel sécurisé à Replicate
+    const replicate = new Replicate({ auth: env.REPLICATE_API_TOKEN });
     let outputUrl: string | null = null;
+    
     try {
       const inputPayload = {
-        prompt,
+        prompt: validatedPrompt,
         image_input: [inputUrl],
         output_format: "jpg",
       } as const;
+      
       const output = await replicate.run(
-        REPLICATE_MODEL as `${string}/${string}` | `${string}/${string}:${string}`,
+        env.REPLICATE_MODEL as `${string}/${string}` | `${string}/${string}:${string}`,
         { input: inputPayload }
       );
       // Gestion des formats possibles: objet avec url(), string, array, ou { output: [] }
@@ -96,31 +158,28 @@ export async function POST(req: NextRequest) {
         outputUrl = extractReplicateUrl(output);
       }
     } catch (err) {
-      const errorId = randomUUID();
-      const message = err instanceof Error ? err.message : String(err);
-      const name = err instanceof Error ? err.name : typeof err;
-      const stack = err instanceof Error && err.stack ? err.stack.split("\n").slice(0, 3).join(" | ") : undefined;
-      console.error("[generate] Replicate error", {
-        errorId,
-        name,
-        message,
-        stack,
-        model: REPLICATE_MODEL,
-        inputUrl,
-        promptPreview: prompt.slice(0, 140),
-        promptLength: prompt.length,
+      console.error("[SECURITY] Replicate API error:", {
+        error: err instanceof Error ? err.message : 'Unknown error',
+        ip,
+        projectId,
+        timestamp: new Date().toISOString()
       });
-      return NextResponse.json({ error: "Erreur Replicate", errorId, message }, { status: 500 });
+      return NextResponse.json({ error: "Erreur de génération" }, { status: 500 });
     }
+    
     if (!outputUrl) {
-      const errorId = randomUUID();
-      console.error("[generate] Replicate returned no output URL", {
-        errorId,
-        model: REPLICATE_MODEL,
-        inputUrl,
-        promptPreview: prompt.slice(0, 140),
+      console.error("[SECURITY] No output URL from Replicate:", {
+        ip,
+        projectId,
+        timestamp: new Date().toISOString()
       });
-      return NextResponse.json({ error: "Aucune image générée", errorId }, { status: 500 });
+      return NextResponse.json({ error: "Aucune image générée" }, { status: 500 });
+    }
+    
+    // Validation de l'URL de sortie
+    if (!isValidUrl(outputUrl)) {
+      console.error("[SECURITY] Invalid output URL from Replicate:", { outputUrl, ip });
+      return NextResponse.json({ error: "URL de sortie invalide" }, { status: 500 });
     }
 
     // Télécharger l'image générée puis uploader dans output-images

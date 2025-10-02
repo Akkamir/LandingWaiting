@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAnalytics } from "./useAnalytics";
+import { validateEmailClient, sanitizeUserInput, clientRateLimit, logSecurityEvent } from "@/lib/security";
 
 export type WaitlistStatus = "idle" | "loading" | "success" | "error";
 
@@ -13,13 +14,24 @@ export function useWaitlistForm() {
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    // Rate limiting côté client
+    if (!clientRateLimit.isAllowed('waitlist-form')) {
+      setStatus("error");
+      setMessage("Trop de tentatives. Veuillez patienter.");
+      logSecurityEvent('Rate limit exceeded', { email: email.substring(0, 3) + '***' });
+      return;
+    }
+    
+    // Sanitisation et validation côté client
+    const sanitizedEmail = sanitizeUserInput(email);
+    if (!validateEmailClient(sanitizedEmail)) {
       setStatus("error");
       setMessage("Email invalide.");
       trackEvent('form_validation_error', {
         'event_category': 'engagement',
         'event_label': 'waitlist_form'
       });
+      logSecurityEvent('Invalid email format', { email: sanitizedEmail.substring(0, 3) + '***' });
       return;
     }
 
@@ -34,8 +46,11 @@ export function useWaitlistForm() {
       
       const res = await fetch("/api/waitlist", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        headers: { 
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest" // Protection CSRF basique
+        },
+        body: JSON.stringify({ email: sanitizedEmail }),
       });
       
       const data = await res.json();
