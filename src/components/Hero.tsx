@@ -103,7 +103,7 @@ export default function Hero({ email, status, message, onEmailChange, onSubmit }
               <button
                 type="submit"
                 aria-label="Rejoindre la liste d'attente"
-                className="btn-primary btn-xl text-base md:text-lg font-bold shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 whitespace-nowrap min-h-[48px] min-w-[48px] bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 border-0 text-white"
+                className="btn-primary btn-xl w-full sm:w-auto justify-center text-sm sm:text-base md:text-lg font-bold shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 whitespace-nowrap min-h-[48px] min-w-[48px] bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 border-0 text-white px-5 sm:px-7"
                 disabled={status === "loading"}
                 aria-describedby="submit-help"
               >
