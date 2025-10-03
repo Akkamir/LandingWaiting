@@ -71,7 +71,8 @@ export function BeforeAfterSlider({
   }, [isDragging]);
 
   return (
-    <div className={`relative w-full h-80 md:h-96 lg:h-[500px] rounded-xl overflow-hidden ${className}`}>
+    // Hauteur responsive et fluide plutôt que des valeurs figées
+    <div className={`relative w-full h-[clamp(18rem,40vh,32rem)] md:h-[clamp(20rem,45vh,34rem)] rounded-xl overflow-hidden ${className}`}>
       <div 
         ref={containerRef}
         className="relative w-full h-full cursor-col-resize select-none"

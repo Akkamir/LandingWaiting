@@ -59,15 +59,14 @@ a:focus-visible {
 }
 
 /* Optimisation: Panneau de prévisualisation responsive */
+/* Utiliser une hauteur fluide avec clamp pour éviter les bornes rigides */
 .preview-panel {
-  height: calc(100vh - 120px); /* Hauteur écran moins header */
-  max-height: 600px; /* Limite max pour les grands écrans */
+  height: clamp(18rem, 40vh, 32rem);
 }
 
 @media (max-width: 768px) {
   .preview-panel {
-    height: 50vh; /* Moitié d'écran sur mobile */
-    max-height: 400px;
+    height: clamp(16rem, 50vh, 28rem);
   }
 }
 
@@ -132,8 +131,9 @@ body {
   position: absolute;
   top: -160px;
   right: -160px;
-  width: 520px;
-  height: 520px;
+  /* Glow fluide qui s'adapte aux écrans; bornes min/max */
+  width: clamp(18rem, 40vw, 32rem);
+  height: clamp(18rem, 40vw, 32rem);
   background: radial-gradient(closest-side, rgba(0,153,255,0.18), rgba(0,85,255,0.08), transparent 70%);
   filter: blur(10px);
   animation: float 8s ease-in-out infinite;

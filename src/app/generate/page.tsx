@@ -161,7 +161,7 @@ export default function GeneratePage() {
             <button className="tab-pill" aria-selected={view==='result'} onClick={() => setView('result')}>Résultat</button>
             <button className="tab-pill" aria-selected={view==='side'} onClick={() => setView('side')}>Côte à côte</button>
           </div>
-          <div className="card overflow-hidden rounded-2xl w-full h-80 md:h-96 lg:h-[500px] relative">
+                          <div className="card overflow-hidden rounded-2xl w-full h-[clamp(18rem,40vh,32rem)] md:h-[clamp(20rem,45vh,34rem)] relative">
                         {view === "side" && previewUrl && resultUrl ? (
                           <BeforeAfterSlider
                             beforeImage={previewUrl}
