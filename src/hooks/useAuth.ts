@@ -46,7 +46,7 @@ export function useAuth() {
 
     // Écouter les changements d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event: any, session: any) => {
         console.log("[AUTH] 🔄 Auth state changed:", {
           event,
           hasSession: !!session,
