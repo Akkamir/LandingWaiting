@@ -7,15 +7,14 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 
-// Fallback pour l'animation Lottie
-const LottieFallback = dynamic(() => import("./LottieFallback"), {
-  ssr: false,
-});
-
 // Optimisation: Lazy loading de Lottie pour éviter le blocage du rendu initial
 const LottieAnimation = dynamic(() => import("./LottieAnimation"), {
   ssr: false, // Pas de rendu côté serveur pour Lottie
-  loading: () => <LottieFallback />,
+  loading: () => (
+    <div className="w-full h-full flex items-center justify-center">
+      <div className="w-16 h-16 border-4 border-white/20 border-t-white/60 rounded-full animate-spin" />
+    </div>
+  ),
 });
 
 type HeroProps = {

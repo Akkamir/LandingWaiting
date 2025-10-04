@@ -7,35 +7,6 @@
 
 html {
   scroll-behavior: smooth;
-  /* Optimisation: Prévention du layout shift */
-  overflow-x: hidden;
-}
-
-/* Optimisation: Performance - contain pour les sections */
-.section-container {
-  contain: layout style paint;
-}
-
-/* Optimisation: will-change dynamique */
-.will-change-transform {
-  will-change: transform;
-}
-
-.will-change-auto {
-  will-change: auto;
-}
-
-/* Optimisation: Skeleton loader pour le lazy loading */
-.skeleton {
-  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
-  background-size: 200% 100%;
-  animation: loading 1.5s infinite;
-  border-radius: 0.5rem;
-}
-
-@keyframes loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
 }
 
 /* Optimisation: Prévention du layout shift avec des dimensions fixes pour les éléments critiques */

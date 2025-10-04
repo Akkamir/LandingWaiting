@@ -36,52 +36,19 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="//fonts.gstatic.com" />
         {/* Favicon pour éviter l'erreur 500 */}
         <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>" />
-        {/* Anti-FOUC: CSS critique optimisé */}
+        {/* Anti-FOUC: CSS critique inline */}
         <style dangerouslySetInnerHTML={{
           __html: `
-            /* Optimisation: CSS critique pour le rendu initial */
             body { 
               background: #0B0B0C; 
               color: #ffffff; 
               font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
               margin: 0;
               padding: 0;
-              overflow-x: hidden;
             }
-            
-            /* Prévention CLS - dimensions fixes pour les éléments critiques */
-            .hero-title { 
-              min-height: 1.2em; 
-              contain: layout style paint;
-            }
-            .hero-subtitle { 
-              min-height: 1.4em; 
-              contain: layout style paint;
-            }
-            
-            /* Optimisation Lottie - dimensions stables */
-            .lottie-container { 
-              aspect-ratio: 16/9; 
-              contain: layout style paint;
-              min-height: 200px;
-              background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-            }
-            
-            /* Optimisation: Skeleton loader pour éviter les flashs */
-            .skeleton {
-              background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
-              background-size: 200% 100%;
-              animation: loading 1.5s infinite;
-            }
-            
-            @keyframes loading {
-              0% { background-position: 200% 0; }
-              100% { background-position: -200% 0; }
-            }
-            
-            /* Optimisation: will-change seulement quand nécessaire */
-            .will-change-transform { will-change: transform; }
-            .will-change-auto { will-change: auto; }
+            .hero-title { min-height: 1.2em; }
+            .hero-subtitle { min-height: 1.4em; }
+            .lottie-container { aspect-ratio: 16/9; contain: layout style paint; }
           `
         }} />
       </head>
