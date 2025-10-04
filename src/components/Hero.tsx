@@ -28,15 +28,24 @@ type HeroProps = {
 export default function Hero({ email, status, message, onEmailChange, onSubmit }: HeroProps) {
   const [isVisible, setIsVisible] = useState(false);
   const { trackEvent } = useAnalytics();
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
   const router = useRouter();
 
   // Redirection automatique si déjà connecté
   useEffect(() => {
+    console.log("[HERO] 🔍 Auth check for redirect:", {
+      loading,
+      isAuthenticated,
+      hasUser: !!user,
+      userEmail: user?.email,
+      timestamp: new Date().toISOString()
+    });
+    
     if (!loading && isAuthenticated) {
+      console.log("[HERO] 🚀 Redirecting to /generate - user is authenticated");
       router.push('/generate');
     }
-  }, [isAuthenticated, loading, router]);
+  }, [isAuthenticated, loading, router, user]);
 
   // Optimisation: Intersection Observer pour charger Lottie seulement quand visible
   useEffect(() => {

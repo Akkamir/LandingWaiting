@@ -11,7 +11,14 @@ export function useAuth() {
     // Récupérer la session actuelle
     const getSession = async () => {
       try {
+        console.log("[AUTH] 🔍 Checking for existing session...");
         const { data: { session } } = await supabaseBrowser.auth.getSession();
+        console.log("[AUTH] 📋 Session check result:", {
+          hasSession: !!session,
+          hasUser: !!session?.user,
+          userEmail: session?.user?.email,
+          timestamp: new Date().toISOString()
+        });
         setUser(session?.user ?? null);
       } catch (error) {
         console.error("[AUTH] Error getting session:", error);

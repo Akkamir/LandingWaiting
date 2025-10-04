@@ -13,6 +13,15 @@ export function Header() {
   const { handleMouseEnter, handleMouseLeave } = useHoverOptimization();
   const { user, loading, signOut, isAuthenticated } = useAuth();
 
+  // Debug: logs pour voir l'état de l'authentification
+  console.log("[HEADER] 🔍 Auth state:", {
+    loading,
+    isAuthenticated,
+    hasUser: !!user,
+    userEmail: user?.email,
+    timestamp: new Date().toISOString()
+  });
+
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-md">
       <div className="container py-3 flex items-center justify-between">
