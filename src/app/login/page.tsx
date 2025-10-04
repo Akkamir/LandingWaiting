@@ -70,15 +70,9 @@ export default function LoginPage() {
       
       // Préparation de la requête - rediriger vers le callback
       const redirectTo = typeof window !== "undefined" && typeof location !== "undefined" ? `${location.origin}/auth/callback` : undefined;
-      const requestPayload = { 
-        email, 
-        options: { 
-          emailRedirectTo: redirectTo 
-        } 
-      };
       
       console.log("[LOGIN] 📤 Sending Supabase auth.signInWithOtp request", {
-        payload: requestPayload,
+        email,
         redirectTo,
         requestTimestamp: new Date().toISOString()
       });
@@ -88,7 +82,10 @@ export default function LoginPage() {
       
       try {
         console.log("[LOGIN] 🔄 Calling supabase.auth.signInWithOtp...");
-        const result = await supabase.auth.signInWithOtp(requestPayload);
+        const result = await supabase.auth.signInWithOtp({
+          email,
+          options: { emailRedirectTo: redirectTo }
+        });
         data = result.data;
         error = result.error;
         console.log("[LOGIN] ✅ Supabase call completed successfully");
