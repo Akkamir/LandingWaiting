@@ -82,11 +82,11 @@ export default function Hero({ email, status, message, onEmailChange, onSubmit }
               <span>4.9/5</span>
             </div>
           </div>
-          <form className="input-bar mt-6" onSubmit={onSubmit} role="form" aria-label="Formulaire d'inscription à la liste d'attente">
-            <div className="flex flex-col sm:flex-row gap-3 w-full">
+          <form className="mt-6" onSubmit={onSubmit} role="form" aria-label="Formulaire d'inscription à la liste d'attente">
+            <div className="flex flex-col gap-3 w-full">
               <input
                 type="email"
-                className="input-ghost flex-1 min-h-[48px]"
+                className="input-ghost w-full min-h-[48px]"
                 placeholder="Ton email pour accéder en priorité"
                 value={email}
                 onChange={(e) => onEmailChange(e.target.value)}
@@ -103,7 +103,7 @@ export default function Hero({ email, status, message, onEmailChange, onSubmit }
               <button
                 type="submit"
                 aria-label="Rejoindre la liste d'attente"
-                className="btn-primary btn-xl w-full sm:w-auto justify-center text-sm sm:text-base md:text-lg font-bold shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 whitespace-nowrap min-h-[48px] min-w-[48px] bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 border-0 text-white px-5 sm:px-7"
+                className="btn-primary btn-xl w-full sm:w-auto sm:self-start justify-center text-sm sm:text-base md:text-lg font-bold shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 whitespace-nowrap min-h-[48px] min-w-[48px] bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 border-0 text-white px-5 sm:px-7"
                 disabled={status === "loading"}
                 aria-describedby="submit-help"
               >
