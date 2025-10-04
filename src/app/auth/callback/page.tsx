@@ -14,8 +14,13 @@ export default function AuthCallback() {
       
       try {
         const { error } = await supabase.auth.getSession() // avale le hash ou échange le code
-        if (error) console.error('[CALLBACK] getSession error:', error.message)
-        router.replace('/generate') // URL propre
+        if (error) {
+          console.error('[CALLBACK] getSession error:', error.message)
+          router.replace('/login?error=callback_error')
+          return
+        }
+        // Redirection vers la page d'accueil - laisse l'utilisateur choisir
+        router.replace('/')
       } catch (error) {
         console.error('[AUTH-CALLBACK] ❌ Unexpected error:', error)
         router.replace('/login?error=callback_error')
