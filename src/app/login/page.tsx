@@ -1,7 +1,15 @@
 "use client";
 import { useState, useEffect } from "react";
-import { supabaseBrowser } from "@/lib/supabaseClient";
 import Link from "next/link";
+
+// Import sécurisé du client Supabase
+let supabaseBrowser: any = null;
+try {
+  const { supabaseBrowser: client } = require("@/lib/supabaseClient");
+  supabaseBrowser = client;
+} catch (error) {
+  console.error("[LOGIN] ❌ Failed to import Supabase client", error);
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -58,6 +66,18 @@ export default function LoginPage() {
         supabaseClientAuth: !!supabaseBrowser?.auth,
         timestamp: new Date().toISOString()
       });
+
+      // Vérification supplémentaire du client Supabase
+      if (!supabaseBrowser || !supabaseBrowser.auth) {
+        console.error("[LOGIN] ❌ SUPABASE CLIENT NOT AVAILABLE", {
+          supabaseBrowser: !!supabaseBrowser,
+          auth: supabaseBrowser?.auth ? 'available' : 'missing',
+          timestamp: new Date().toISOString()
+        });
+        setStatus("error");
+        setMessage("Client Supabase non disponible. Veuillez recharger la page.");
+        return;
+      }
       
       // Test de connectivité réseau détaillé
       if (typeof window !== "undefined" && typeof navigator !== "undefined" && typeof location !== "undefined") {
@@ -97,7 +117,28 @@ export default function LoginPage() {
       });
       
       const requestStartTime = Date.now();
-      const { data, error } = await supabaseBrowser.auth.signInWithOtp(requestPayload);
+      let data, error;
+      
+      try {
+        console.log("[LOGIN] 🔄 Calling supabaseBrowser.auth.signInWithOtp...");
+        const result = await supabaseBrowser.auth.signInWithOtp(requestPayload);
+        data = result.data;
+        error = result.error;
+        console.log("[LOGIN] ✅ Supabase call completed successfully");
+      } catch (supabaseError) {
+        console.error("[LOGIN] ❌ SUPABASE CALL FAILED", {
+          error: supabaseError,
+          message: supabaseError instanceof Error ? supabaseError.message : 'Unknown error',
+          stack: supabaseError instanceof Error ? supabaseError.stack : undefined,
+          name: supabaseError instanceof Error ? supabaseError.name : undefined,
+          type: typeof supabaseError,
+          timestamp: new Date().toISOString()
+        });
+        setStatus("error");
+        setMessage(`Erreur de connexion Supabase: ${supabaseError instanceof Error ? supabaseError.message : 'Erreur inconnue'}`);
+        return;
+      }
+      
       const requestDuration = Date.now() - requestStartTime;
       
       console.log("[LOGIN] 📥 Supabase response received", { 

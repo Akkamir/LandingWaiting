@@ -22,13 +22,19 @@ console.log("[SUPABASE] 🔧 Initializing Supabase client", {
   allSupabaseEnvVars: Object.keys(process.env).filter(k => k.includes('SUPABASE'))
 });
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn("[SUPABASE] ⚠️ Variables d'environnement Supabase manquantes. Créez un fichier .env.local avec NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY");
+if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('placeholder')) {
+  console.error("[SUPABASE] ❌ Variables d'environnement Supabase manquantes ou invalides", {
+    hasUrl: !!supabaseUrl,
+    hasKey: !!supabaseAnonKey,
+    isPlaceholder: supabaseUrl?.includes('placeholder'),
+    message: "Créez un fichier .env.local avec NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY"
+  });
+  throw new Error("Configuration Supabase manquante. Vérifiez vos variables d'environnement.");
 }
 
 console.log("[SUPABASE] 📦 Creating Supabase client with config", {
-  url: supabaseUrl || "https://placeholder.supabase.co",
-  keyLength: (supabaseAnonKey || "placeholder-key").length,
+  url: supabaseUrl,
+  keyLength: supabaseAnonKey.length,
   authConfig: {
     persistSession: true,
     autoRefreshToken: true
@@ -37,8 +43,8 @@ console.log("[SUPABASE] 📦 Creating Supabase client with config", {
 });
 
 export const supabaseBrowser = createClient(
-  supabaseUrl || "https://placeholder.supabase.co",
-  supabaseAnonKey || "placeholder-key",
+  supabaseUrl,
+  supabaseAnonKey,
   {
     auth: {
       persistSession: true,
