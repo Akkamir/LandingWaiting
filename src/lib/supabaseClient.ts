@@ -19,17 +19,24 @@ console.log("[SUPABASE] 🔧 Initializing Supabase client", {
     try { new URL(supabaseUrl); return true; } catch { return false; }
   })() : false,
   nodeEnv: process.env.NODE_ENV,
-  allSupabaseEnvVars: Object.keys(process.env).filter(k => k.includes('SUPABASE'))
+  allSupabaseEnvVars: Object.keys(process.env).filter(k => k.includes('SUPABASE')),
+  // Debug: vérifier toutes les variables d'environnement
+  allEnvVars: Object.keys(process.env).filter(k => k.includes('NEXT_PUBLIC')),
+  // Debug: vérifier si on est côté client ou serveur
+  isClient: typeof window !== 'undefined',
+  isServer: typeof window === 'undefined'
 });
 
 // Créer un client Supabase conditionnel
 let supabaseBrowser: any;
 
-if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('placeholder')) {
+if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('placeholder') || supabaseUrl.includes('your-project')) {
   console.error("[SUPABASE] ❌ Variables d'environnement Supabase manquantes ou invalides", {
     hasUrl: !!supabaseUrl,
     hasKey: !!supabaseAnonKey,
     isPlaceholder: supabaseUrl?.includes('placeholder'),
+    isYourProject: supabaseUrl?.includes('your-project'),
+    urlValue: supabaseUrl,
     message: "Créez un fichier .env.local avec NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY"
   });
   
