@@ -12,7 +12,21 @@ export default function LoginPage() {
     e.preventDefault();
     setStatus("loading");
     setMessage("");
-    const { error } = await supabaseBrowser.auth.signInWithOtp({ email, options: { emailRedirectTo: typeof window !== "undefined" ? `${location.origin}/generate` : undefined } });
+    
+    // Vérifier si Supabase est configuré
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')) {
+      setStatus("error");
+      setMessage("Configuration Supabase manquante. Veuillez configurer NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY dans .env.local");
+      return;
+    }
+    
+    const { error } = await supabaseBrowser.auth.signInWithOtp({ 
+      email, 
+      options: { 
+        emailRedirectTo: typeof window !== "undefined" ? `${location.origin}/generate` : undefined 
+      } 
+    });
+    
     if (error) {
       setStatus("error");
       setMessage(error.message);
@@ -27,6 +41,14 @@ export default function LoginPage() {
       <div className="w-full max-w-md card p-6 rounded-2xl border border-white/10 bg-white/5">
         <h1 className="text-2xl font-semibold">Connexion</h1>
         <p className="text-white/70 mt-1">Recevez un lien magique par e‑mail.</p>
+        
+        {(!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')) && (
+          <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+            <p className="text-yellow-300 text-sm">
+              ⚠️ Configuration Supabase requise. Créez un fichier <code className="bg-black/20 px-1 rounded">.env.local</code> avec vos clés Supabase.
+            </p>
+          </div>
+        )}
         <form onSubmit={handleLogin} className="mt-6 flex flex-col gap-3">
           <input
             type="email"

@@ -35,25 +35,48 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
-## Authentification Supabase (email)
+## 🔐 Configuration Supabase Auth
 
-1. Créez deux variables d'environnement côté client:
+### 1. Variables d'environnement
 
+Créez un fichier `.env.local` à la racine du projet :
+
+```bash
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=https://votre-projet.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=votre_anon_key
+SUPABASE_URL=https://votre-projet.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=votre_service_role_key
+
+# Replicate Configuration
+REPLICATE_API_TOKEN=votre_replicate_token
+REPLICATE_MODEL=google/nano-banana
 ```
-NEXT_PUBLIC_SUPABASE_URL=...
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+
+### 2. Configuration Supabase
+
+1. **Créer un projet Supabase** sur [supabase.com](https://supabase.com)
+2. **Récupérer les clés** dans Settings > API
+3. **Exécuter le SQL** dans l'éditeur SQL de Supabase :
+
+```sql
+-- Migration: ajouter user_id à projects
+alter table public.projects
+  add column if not exists user_id uuid references auth.users(id) on delete set null;
+
+create index if not exists idx_projects_user_id on public.projects(user_id);
+
+-- RLS: restreindre l'accès par utilisateur
+alter table public.projects enable row level security;
+
+create policy "Allow owner read" on public.projects for select using (auth.uid() = user_id);
+create policy "Allow owner insert" on public.projects for insert with check (auth.uid() = user_id);
+create policy "Allow owner update" on public.projects for update using (auth.uid() = user_id);
+create policy "Allow owner delete" on public.projects for delete using (auth.uid() = user_id);
 ```
 
-2. Variables serveur déjà utilisées:
-```
-SUPABASE_URL=...
-SUPABASE_SERVICE_ROLE_KEY=...
-```
+### 3. Utilisation
 
-3. Exécutez la migration et les politiques RLS dans Supabase SQL editor:
-- `supabase/migrations/20251004_add_user_id.sql`
-- `supabase/rls.sql`
-
-4. La page `/login` permet d'envoyer un lien magique par e‑mail.
-
-5. L'API `/api/generate` exige un utilisateur authentifié et enregistre `user_id` dans `projects`. Les RLS font que chaque utilisateur ne peut lire que ses projets.
+- **Page `/login`** : Envoi de lien magique par email
+- **Page `/generate`** : Génération d'images (authentification requise)
+- **Isolation des données** : Chaque utilisateur ne voit que ses projets
