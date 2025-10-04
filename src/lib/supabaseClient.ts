@@ -57,7 +57,7 @@ export const supabaseBrowser = createClient(
 );
 
 console.log("[SUPABASE] ✅ Client created successfully", {
-  clientUrl: supabaseBrowser.supabaseUrl,
+  clientUrl: supabaseUrl,
   isConnected: !!supabaseBrowser,
   hasAuth: !!supabaseBrowser.auth,
   hasStorage: !!supabaseBrowser.storage,

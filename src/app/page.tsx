@@ -28,7 +28,7 @@ export default function Home() {
     if (!waitlistForm.showToast) return;
     const t = setTimeout(() => waitlistForm.setShowToast(false), 2600);
     return () => clearTimeout(t);
-  }, [waitlistForm.showToast, waitlistForm.setShowToast]);
+  }, [waitlistForm.showToast, waitlistForm.setShowToast, waitlistForm]);
 
   // Lightbox ESC to close
   useEffect(() => {
