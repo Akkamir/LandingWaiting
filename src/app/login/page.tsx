@@ -8,41 +8,6 @@ export default function LoginPage() {
   const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">("idle");
   const [message, setMessage] = useState("");
 
-  // Logs de diagnostic au montage du composant
-  useEffect(() => {
-    console.log("[LOGIN] Component mounted", {
-      timestamp: new Date().toISOString(),
-      userAgent: typeof window !== "undefined" ? navigator.userAgent : undefined,
-      location: typeof window !== "undefined" && typeof location !== "undefined" ? location.href : undefined,
-      referrer: typeof window !== "undefined" && typeof document !== "undefined" ? document.referrer : undefined
-    });
-
-    // Vérification des variables d'environnement au montage
-    console.log("[LOGIN] Environment variables check on mount", {
-      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? `${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.substring(0, 10)}...` : undefined,
-      NODE_ENV: process.env.NODE_ENV,
-      allEnvKeys: Object.keys(process.env).filter(key => key.startsWith('NEXT_PUBLIC_'))
-    });
-
-    // Test de connectivité réseau
-    if (typeof window !== "undefined" && typeof navigator !== "undefined") {
-      try {
-        console.log("[LOGIN] Network diagnostics", {
-          online: navigator.onLine,
-          connection: (navigator as any).connection ? {
-            effectiveType: (navigator as any).connection.effectiveType,
-            downlink: (navigator as any).connection.downlink,
-            rtt: (navigator as any).connection.rtt
-          } : 'not available',
-          cookieEnabled: navigator.cookieEnabled,
-          doNotTrack: navigator.doNotTrack
-        });
-      } catch (err) {
-        console.warn("[LOGIN] Network diagnostics failed", err);
-      }
-    }
-  }, []);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
