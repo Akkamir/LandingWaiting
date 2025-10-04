@@ -21,6 +21,13 @@ export function ClientAuthProvider({ children }: { children: React.ReactNode }) 
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Vérifier si Supabase est disponible
+    if (!supabase) {
+      console.warn('[AUTH] Supabase non configuré. Authentification désactivée.')
+      setLoading(false)
+      return
+    }
+
     // Récupérer la session initiale
     const getInitialSession = async () => {
       try {
@@ -49,6 +56,9 @@ export function ClientAuthProvider({ children }: { children: React.ReactNode }) 
   }, [])
 
   const signIn = async (email: string, password: string) => {
+    if (!supabase) {
+      return { error: new Error('Supabase non configuré') }
+    }
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -61,6 +71,9 @@ export function ClientAuthProvider({ children }: { children: React.ReactNode }) 
   }
 
   const signUp = async (email: string, password: string) => {
+    if (!supabase) {
+      return { error: new Error('Supabase non configuré') }
+    }
     try {
       const { error } = await supabase.auth.signUp({
         email,
@@ -73,6 +86,9 @@ export function ClientAuthProvider({ children }: { children: React.ReactNode }) 
   }
 
   const signOut = async () => {
+    if (!supabase) {
+      return { error: new Error('Supabase non configuré') }
+    }
     try {
       const { error } = await supabase.auth.signOut()
       return { error }
