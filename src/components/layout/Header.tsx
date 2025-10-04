@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useHoverOptimization } from "@/components/OptimizedAnimations";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/components/providers/ClientProviders";
 
 const navigationItems = [
   { label: 'Produit', href: '#features' },

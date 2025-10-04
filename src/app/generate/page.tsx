@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/components/providers/ClientProviders';
 import GenerateScreen from './GenerateScreen';
 
 export default function GeneratePage() {

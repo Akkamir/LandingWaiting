@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import NoSSR from "./NoSSR";
 import Head from "next/head";
 import { useAnalytics } from "@/hooks/useAnalytics";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/components/providers/ClientProviders";
 import { useRouter } from "next/navigation";
 
 // Optimisation: Lazy loading de Lottie pour éviter le blocage du rendu initial
