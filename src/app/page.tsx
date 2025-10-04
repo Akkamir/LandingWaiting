@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState, memo } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Toast } from "@/components/ui/Toast";
 import { Lightbox } from "@/components/ui/Lightbox";
-import { HeroSection } from "@/components/features/landing/HeroSection";
+import Hero from "@/components/Hero";
 import LazySection from "@/components/LazySection";
 import { useOptimizedAnimations } from "@/components/OptimizedAnimations";
 import { useWaitlistForm } from "@/hooks/useWaitlistForm";
@@ -34,7 +34,7 @@ const FAQSection = dynamic(() => import("@/components/sections/FAQSection").then
   loading: () => <div className="skeleton h-96 w-full rounded" />
 });
 
-const Home = memo(function Home() {
+export default function Home() {
   const [lightbox, setLightbox] = useState<{ open: boolean; src?: string }>({ open: false });
   
   // Hooks personnalisés
@@ -64,7 +64,7 @@ const Home = memo(function Home() {
 
       <main className="flex-1">
         {/* Section critique - chargée immédiatement */}
-        <HeroSection
+        <Hero
           email={waitlistForm.email}
           status={waitlistForm.status}
           message={waitlistForm.message}
@@ -115,6 +115,4 @@ const Home = memo(function Home() {
       <Footer />
     </div>
   );
-});
-
-export default Home;
+}

@@ -1,104 +1,109 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAnalytics } from "./useAnalytics";
+import { validateEmailClient, sanitizeUserInput, clientRateLimit, logSecurityEvent } from "@/lib/security";
 
-interface WaitlistFormState {
-  email: string;
-  status: "idle" | "loading" | "success" | "error";
-  message: string;
-  showToast: boolean;
-}
+export type WaitlistStatus = "idle" | "loading" | "success" | "error";
 
 export function useWaitlistForm() {
-  const [state, setState] = useState<WaitlistFormState>({
-    email: "",
-    status: "idle",
-    message: "",
-    showToast: false
-  });
-
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<WaitlistStatus>("idle");
+  const [message, setMessage] = useState<string>("");
+  const [showToast, setShowToast] = useState(false);
   const { trackEvent } = useAnalytics();
+  const router = useRouter();
 
-  const setEmail = useCallback((email: string) => {
-    setState(prev => ({ ...prev, email }));
-  }, []);
-
-  const setShowToast = useCallback((show: boolean) => {
-    setState(prev => ({ ...prev, showToast: show }));
-  }, []);
-
-  const handleJoin = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!state.email.trim()) {
-      setState(prev => ({
-        ...prev,
-        status: "error",
-        message: "Email requis"
-      }));
+    // Rate limiting côté client
+    if (!clientRateLimit.isAllowed('waitlist-form')) {
+      setStatus("error");
+      setMessage("Trop de tentatives. Veuillez patienter.");
+      logSecurityEvent('Rate limit exceeded', { email: email.substring(0, 3) + '***' });
+      return;
+    }
+    
+    // Sanitisation et validation côté client
+    const sanitizedEmail = sanitizeUserInput(email);
+    if (!validateEmailClient(sanitizedEmail)) {
+      setStatus("error");
+      setMessage("Email invalide.");
+      trackEvent({
+        event: 'form_validation_error',
+        category: 'engagement',
+        label: 'waitlist_form'
+      });
+      logSecurityEvent('Invalid email format', { email: sanitizedEmail.substring(0, 3) + '***' });
       return;
     }
 
-    setState(prev => ({ ...prev, status: "loading" }));
-
     try {
-      // Track form submission
+      setStatus("loading");
+      setMessage("");
+      
       trackEvent({
-        event: 'form_submit',
-        category: 'waitlist',
-        label: 'email_signup'
+        event: 'form_submit_start',
+        category: 'conversion',
+        label: 'waitlist_form'
       });
-
-      const response = await fetch("/api/waitlist", {
+      
+      const res = await fetch("/api/waitlist", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: state.email })
+        headers: { 
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest" // Protection CSRF basique
+        },
+        body: JSON.stringify({ email: sanitizedEmail }),
       });
-
-      if (!response.ok) {
-        throw new Error("Erreur d'inscription");
-      }
-
-      setState(prev => ({
-        ...prev,
-        status: "success",
-        message: "Inscription réussie ! Redirection vers le produit...",
-        showToast: true
-      }));
-
-      // Track successful signup
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Erreur inconnue");
+      
+      setStatus("success");
+      setMessage("Merci, tu es bien inscrit(e) ! Redirection vers le produit...");
+      setShowToast(true);
+      setEmail("");
+      
       trackEvent({
         event: 'conversion',
-        category: 'waitlist',
-        label: 'email_signup_success'
+        category: 'conversion',
+        label: 'waitlist_signup',
+        value: 1
       });
-
-    } catch (error) {
-      setState(prev => ({
-        ...prev,
-        status: "error",
-        message: "Erreur d'inscription. Réessaie."
-      }));
-
-      // Track error
+      
+      // Redirection vers la page du produit après 2 secondes
+      setTimeout(() => {
+        trackEvent({
+          event: 'redirect_to_product',
+          category: 'navigation',
+          label: 'post_signup_redirect'
+        });
+        router.push('/generate');
+      }, 2000);
+    } catch (err: unknown) {
+      setStatus("error");
+      const fallback = "Une erreur est survenue.";
+      if (err instanceof Error) {
+        setMessage(err.message || fallback);
+      } else {
+        setMessage(fallback);
+      }
+      
       trackEvent({
-        event: 'form_error',
-        category: 'waitlist',
-        label: 'email_signup_error'
+        event: 'form_submit_error',
+        category: 'error',
+        label: 'waitlist_form'
       });
     }
-  }, [state.email, trackEvent]);
-
-  // Mémoisation des valeurs pour éviter les re-renders
-  const memoizedState = useMemo(() => ({
-    email: state.email,
-    status: state.status,
-    message: state.message,
-    showToast: state.showToast
-  }), [state.email, state.status, state.message, state.showToast]);
+  };
 
   return {
-    ...memoizedState,
+    email,
     setEmail,
+    status,
+    message,
+    showToast,
     setShowToast,
     handleJoin
   };
