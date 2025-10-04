@@ -13,8 +13,8 @@ export default function LoginPage() {
     console.log("[LOGIN] Component mounted", {
       timestamp: new Date().toISOString(),
       userAgent: typeof window !== "undefined" ? navigator.userAgent : undefined,
-      location: typeof window !== "undefined" ? location.href : undefined,
-      referrer: typeof window !== "undefined" ? document.referrer : undefined
+      location: typeof window !== "undefined" && typeof location !== "undefined" ? location.href : undefined,
+      referrer: typeof window !== "undefined" && typeof document !== "undefined" ? document.referrer : undefined
     });
 
     // Vérification des variables d'environnement au montage
@@ -26,17 +26,21 @@ export default function LoginPage() {
     });
 
     // Test de connectivité réseau
-    if (typeof window !== "undefined") {
-      console.log("[LOGIN] Network diagnostics", {
-        online: navigator.onLine,
-        connection: (navigator as any).connection ? {
-          effectiveType: (navigator as any).connection.effectiveType,
-          downlink: (navigator as any).connection.downlink,
-          rtt: (navigator as any).connection.rtt
-        } : 'not available',
-        cookieEnabled: navigator.cookieEnabled,
-        doNotTrack: navigator.doNotTrack
-      });
+    if (typeof window !== "undefined" && typeof navigator !== "undefined") {
+      try {
+        console.log("[LOGIN] Network diagnostics", {
+          online: navigator.onLine,
+          connection: (navigator as any).connection ? {
+            effectiveType: (navigator as any).connection.effectiveType,
+            downlink: (navigator as any).connection.downlink,
+            rtt: (navigator as any).connection.rtt
+          } : 'not available',
+          cookieEnabled: navigator.cookieEnabled,
+          doNotTrack: navigator.doNotTrack
+        });
+      } catch (err) {
+        console.warn("[LOGIN] Network diagnostics failed", err);
+      }
     }
   }, []);
 
@@ -91,24 +95,28 @@ export default function LoginPage() {
       });
       
       // Test de connectivité réseau détaillé
-      if (typeof window !== "undefined") {
-        console.log("[LOGIN] Network diagnostics before request", {
-          online: navigator.onLine,
-          connection: (navigator as any).connection ? {
-            effectiveType: (navigator as any).connection.effectiveType,
-            downlink: (navigator as any).connection.downlink,
-            rtt: (navigator as any).connection.rtt,
-            saveData: (navigator as any).connection.saveData
-          } : 'not available',
-          currentOrigin: location.origin,
-          protocol: location.protocol,
-          hostname: location.hostname,
-          port: location.port
-        });
+      if (typeof window !== "undefined" && typeof navigator !== "undefined" && typeof location !== "undefined") {
+        try {
+          console.log("[LOGIN] Network diagnostics before request", {
+            online: navigator.onLine,
+            connection: (navigator as any).connection ? {
+              effectiveType: (navigator as any).connection.effectiveType,
+              downlink: (navigator as any).connection.downlink,
+              rtt: (navigator as any).connection.rtt,
+              saveData: (navigator as any).connection.saveData
+            } : 'not available',
+            currentOrigin: location.origin,
+            protocol: location.protocol,
+            hostname: location.hostname,
+            port: location.port
+          });
+        } catch (err) {
+          console.warn("[LOGIN] Network diagnostics failed", err);
+        }
       }
       
       // Préparation de la requête
-      const redirectTo = typeof window !== "undefined" ? `${location.origin}/generate` : undefined;
+      const redirectTo = typeof window !== "undefined" && typeof location !== "undefined" ? `${location.origin}/generate` : undefined;
       const requestPayload = { 
         email, 
         options: { 
