@@ -7,9 +7,17 @@
 - **SITE URL** : `http://localhost:3003`
 - **Authorized Redirect URLs** : `http://localhost:3003/auth/callback`
 
-### 2. Email Templates (optionnel)
+### 2. Email Templates (CRITIQUE)
 
-Si tu as configuré des modèles d'email personnalisés, assure-toi que le redirect par défaut pointe vers `/auth/callback`.
+**Option A - Plus simple (recommandée) :**
+- Utilise le template par défaut avec `{{ .ConfirmationURL }}`
+- Le lien doit pointer vers `https://<ton-projet>.supabase.co/auth/v1/verify`
+- PAS vers `http://localhost:3000/auth/v1/verify` (écran noir)
+
+**Option B - Template personnalisé :**
+```html
+<p><a href="{{ .ConfirmationURL }}&redirect_to={{ .SiteURL | urlquery }}/auth/callback">Log In</a></p>
+```
 
 ## 🚀 Flux de Connexion
 
@@ -36,3 +44,12 @@ Si tu as configuré des modèles d'email personnalisés, assure-toi que le redir
 - **Middleware** : Doit être à la racine du projet (`middleware.ts`)
 - **Matcher** : `['/(.*)']` pour couvrir toutes les routes
 - **Redirect URLs** : Ajoute `/auth/callback` dans les URLs autorisées
+- **Email Template** : Utilise `{{ .ConfirmationURL }}` (domaine Supabase)
+- **Vérification** : Le lien email doit commencer par `https://<projet>.supabase.co/auth/v1/verify`
+
+## 🔍 Vérifications Rapides
+
+1. **Email** : Survole le lien → doit commencer par `https://<projet>.supabase.co/auth/v1/verify`
+2. **Logs** : Tu dois voir `GET /auth/callback` dans les logs Next.js
+3. **Cookies** : DevTools → Application → Cookies → `sb-access-token` / `sb-refresh-token`
+4. **Session** : Retour sur `/` → tu restes connecté (SSR lit via cookies)

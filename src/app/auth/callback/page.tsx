@@ -13,7 +13,7 @@ export default function AuthCallback() {
       const supabase = createBrowserSupabase()
       
       try {
-        // Parse & persiste la session (depuis #hash ou code PKCE) puis cookies via middleware
+        // Parse le hash (ou gère PKCE) et persiste la session
         const { data: { session }, error } = await supabase.auth.getSession()
         
         console.log('[AUTH-CALLBACK] 📋 Session result:', {
@@ -21,7 +21,8 @@ export default function AuthCallback() {
           hasUser: !!session?.user,
           userEmail: session?.user?.email,
           error: error?.message,
-          urlHash: window.location.hash
+          urlHash: window.location.hash,
+          urlSearch: window.location.search
         })
         
         if (error) {
@@ -32,7 +33,7 @@ export default function AuthCallback() {
         
         if (session?.user) {
           console.log('[AUTH-CALLBACK] ✅ User authenticated, redirecting to /generate')
-          // URL propre, sans hash
+          // URL propre + suite de ton flow
           router.replace('/generate')
         } else {
           console.log('[AUTH-CALLBACK] ⚠️ No session found, redirecting to /login')
