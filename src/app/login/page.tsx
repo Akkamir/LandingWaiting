@@ -5,7 +5,7 @@ import Link from "next/link";
 // Import sécurisé du client Supabase
 let supabaseBrowser: any = null;
 try {
-  const { supabaseBrowser: client } = require("@/lib/supabaseClient");
+  const { supabaseBrowser: client } = require("@/lib/supabaseClientBrowser");
   supabaseBrowser = client;
 } catch (error) {
   console.error("[LOGIN] ❌ Failed to import Supabase client", error);
