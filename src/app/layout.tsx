@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { ClientAuthProvider } from "@/components/providers/ClientAuthProvider";
 import "./globals.css";
 
 // Optimisation: Preload de la police critique
@@ -36,7 +35,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="dns-prefetch" href="//fonts.gstatic.com" />
         {/* Favicon pour éviter l'erreur 500 */}
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>" />
         {/* Anti-FOUC: CSS critique inline */}
         <style dangerouslySetInnerHTML={{
           __html: `
@@ -54,10 +53,8 @@ export default function RootLayout({
         }} />
       </head>
       <body className="antialiased bg-app">
-        <ClientAuthProvider>
-          {children}
-          <SpeedInsights />
-        </ClientAuthProvider>
+        {children}
+        <SpeedInsights />
       </body>
     </html>
   );

@@ -1,0 +1,54 @@
+"use client";
+import { useState } from "react";
+import { supabaseBrowser } from "@/lib/supabaseClient";
+import Link from "next/link";
+
+export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">("idle");
+  const [message, setMessage] = useState("");
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setStatus("loading");
+    setMessage("");
+    const { error } = await supabaseBrowser.auth.signInWithOtp({ email, options: { emailRedirectTo: typeof window !== "undefined" ? `${location.origin}/generate` : undefined } });
+    if (error) {
+      setStatus("error");
+      setMessage(error.message);
+      return;
+    }
+    setStatus("sent");
+    setMessage("Lien magique envoyé. Vérifie ta boîte mail.");
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-6">
+      <div className="w-full max-w-md card p-6 rounded-2xl border border-white/10 bg-white/5">
+        <h1 className="text-2xl font-semibold">Connexion</h1>
+        <p className="text-white/70 mt-1">Recevez un lien magique par e‑mail.</p>
+        <form onSubmit={handleLogin} className="mt-6 flex flex-col gap-3">
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full min-h-[48px] bg-white/5 backdrop-blur-sm rounded-full px-4 py-2 text-white placeholder-gray-400 border border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            placeholder="Votre e‑mail"
+          />
+          <button disabled={status === "loading"} className="btn-primary btn-xl w-full justify-center min-h-[48px]">
+            {status === "loading" ? "Envoi…" : "Envoyer le lien"}
+          </button>
+        </form>
+        {message && (
+          <p className={`mt-3 text-sm ${status === "error" ? "text-red-300" : "text-green-300"}`}>{message}</p>
+        )}
+        <div className="mt-6 text-sm text-white/70">
+          <Link className="underline" href="/">← Retour</Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+

@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
+import { supabaseBrowser } from "@/lib/supabaseClient";
 import { validateImageFile } from "@/lib/utils";
-import { useAuth } from "@/components/providers/ClientAuthProvider";
 
 export function useImageGeneration() {
   const [file, setFile] = useState<File | null>(null);
@@ -9,7 +9,6 @@ export function useImageGeneration() {
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<"original" | "result" | "side">("original");
-  const { session } = useAuth();
 
   const handleFileChange = useCallback((selectedFile: File | null) => {
     setError(null);
@@ -50,12 +49,14 @@ export function useImageGeneration() {
       formData.append("image", file);
       formData.append("prompt", prompt);
 
+      // Récupérer le JWT de l'utilisateur
+      const { data: sessionData } = await supabaseBrowser.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+
       const res = await fetch("/api/generate", { 
         method: "POST", 
-        headers: {
-          'Authorization': `Bearer ${session?.access_token}`
-        },
-        body: formData 
+        body: formData,
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
       });
       
       const data = await res.json();

@@ -3,7 +3,6 @@ import { createClient } from "@supabase/supabase-js";
 import Replicate from "replicate";
 import { randomUUID } from "crypto";
 import { validateInput, promptSchema, imageFileSchema, isValidUrl } from "@/lib/validation";
-import { supabase } from "@/lib/supabase";
 
 // Validation sécurisée des variables d'environnement
 function validateEnvironment() {
@@ -71,31 +70,6 @@ export async function POST(req: NextRequest) {
   console.log("[GENERATE] Starting generation request", { ip, projectId, timestamp: new Date().toISOString() });
   
   try {
-    // Vérification de l'authentification
-    const authHeader = req.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      console.warn(`[SECURITY] No auth token from ${ip}`);
-      return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
-    }
-
-    const token = authHeader.split(' ')[1];
-    
-    // Initialiser Supabase admin pour vérifier l'auth
-    const supabaseAdmin = getSupabaseAdmin();
-    if (!supabaseAdmin) {
-      console.error("[SECURITY] Supabase admin initialization failed");
-      return NextResponse.json({ error: "Service temporairement indisponible" }, { status: 503 });
-    }
-    
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    
-    if (authError || !user) {
-      console.warn(`[SECURITY] Invalid auth token from ${ip}:`, authError?.message);
-      return NextResponse.json({ error: "Token invalide" }, { status: 401 });
-    }
-
-    console.log("[GENERATE] User authenticated:", { userId: user.id });
-
     // Validation de l'environnement
     const env = validateEnvironment();
     if (!env) {
@@ -104,6 +78,28 @@ export async function POST(req: NextRequest) {
     }
     
     console.log("[GENERATE] Environment validated successfully");
+    
+    const supabase = getSupabaseAdmin();
+    if (!supabase) {
+      console.error("[SECURITY] Supabase initialization failed");
+      return NextResponse.json({ error: "Service temporairement indisponible" }, { status: 503 });
+    }
+
+    // Auth: récupérer l'utilisateur courant via un JWT passé par le client
+    const authHeader = req.headers.get('authorization');
+    const bearer = authHeader?.startsWith('Bearer ')
+      ? authHeader.slice('Bearer '.length)
+      : undefined;
+
+    let userId: string | null = null;
+    if (bearer) {
+      const { data: userRes } = await supabase.auth.getUser(bearer);
+      userId = userRes?.user?.id ?? null;
+    }
+    if (!userId) {
+      console.warn('[SECURITY] Unauthenticated generate call');
+      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
+    }
 
     // Validation sécurisée des données d'entrée
     const formData = await req.formData();
@@ -131,7 +127,7 @@ export async function POST(req: NextRequest) {
     const bytes = Buffer.from(await validatedFile.arrayBuffer());
     const inputPath = `projects/${projectId}/input-${Date.now()}.${validatedFile.type.split('/')[1] || 'png'}`;
     
-    const { error: upErr } = await supabaseAdmin.storage.from("input-images").upload(inputPath, bytes, {
+    const { error: upErr } = await supabase.storage.from("input-images").upload(inputPath, bytes, {
       contentType: validatedFile.type,
       upsert: false,
     });
@@ -146,7 +142,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Erreur d'upload" }, { status: 500 });
     }
     
-    const { data: pubInput } = supabaseAdmin.storage.from("input-images").getPublicUrl(inputPath);
+    const { data: pubInput } = supabase.storage.from("input-images").getPublicUrl(inputPath);
     const inputUrl = pubInput.publicUrl;
     
     console.log("[GENERATE] Input URL generated:", { inputUrl, path: inputPath });
@@ -238,7 +234,7 @@ export async function POST(req: NextRequest) {
     }
     const genBuf = Buffer.from(await genRes.arrayBuffer());
     const outputPath = `projects/${projectId}/output-${Date.now()}.png`;
-    const { error: outErr } = await supabaseAdmin.storage.from("output-images").upload(outputPath, genBuf, {
+    const { error: outErr } = await supabase.storage.from("output-images").upload(outputPath, genBuf, {
       contentType: genRes.headers.get("content-type") || "image/png",
       upsert: false,
     });
@@ -252,17 +248,17 @@ export async function POST(req: NextRequest) {
       });
       return NextResponse.json({ error: `Upload output: ${outErr.message}`, errorId }, { status: 400 });
     }
-    const { data: pubOutput } = supabaseAdmin.storage.from("output-images").getPublicUrl(outputPath);
+    const { data: pubOutput } = supabase.storage.from("output-images").getPublicUrl(outputPath);
     const storedOutputUrl = pubOutput.publicUrl;
 
-    // Enregistrer en base avec user_id
-    const { error: insertErr } = await supabaseAdmin.from("projects").insert({
+    // Enregistrer en base
+    const { error: insertErr } = await supabase.from("projects").insert({
       id: projectId,
-      user_id: user.id,
       input_image_url: inputUrl,
       output_image_url: storedOutputUrl,
       prompt,
       status: "completed",
+      user_id: userId,
     });
     if (insertErr) {
       const errorId = randomUUID();

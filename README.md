@@ -34,3 +34,26 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Authentification Supabase (email)
+
+1. Créez deux variables d'environnement côté client:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+```
+
+2. Variables serveur déjà utilisées:
+```
+SUPABASE_URL=...
+SUPABASE_SERVICE_ROLE_KEY=...
+```
+
+3. Exécutez la migration et les politiques RLS dans Supabase SQL editor:
+- `supabase/migrations/20251004_add_user_id.sql`
+- `supabase/rls.sql`
+
+4. La page `/login` permet d'envoyer un lien magique par e‑mail.
+
+5. L'API `/api/generate` exige un utilisateur authentifié et enregistre `user_id` dans `projects`. Les RLS font que chaque utilisateur ne peut lire que ses projets.
