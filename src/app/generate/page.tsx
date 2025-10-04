@@ -8,8 +8,35 @@ import { PlatformSizePresets, type SizePreset } from "@/components/ui/PlatformSi
 import { PrivacyControls, type PrivacySettings } from "@/components/ui/PrivacyControls";
 import { BeforeAfterSlider } from "@/components/ui/BeforeAfterSlider";
 import { useImageGeneration } from "@/hooks/useImageGeneration";
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 
 export default function GeneratePage() {
+  const { isAuthenticated, loading: authLoading } = useAuth();
+  const router = useRouter();
+  
+  // Redirection si non authentifié
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      console.log("[GENERATE] ❌ User not authenticated, redirecting to login");
+      router.push('/login');
+    }
+  }, [isAuthenticated, authLoading, router]);
+
+  // Loading state pendant la vérification d'authentification
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-white/20 border-t-white/60 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Si non authentifié, ne pas afficher la page (redirection en cours)
+  if (!isAuthenticated) {
+    return null;
+  }
+
   const {
     file,
     prompt,
