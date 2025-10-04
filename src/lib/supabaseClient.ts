@@ -33,7 +33,18 @@ let supabaseBrowser: any;
 // Vérifier si on est côté client
 const isClient = typeof window !== 'undefined';
 
-if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('placeholder') || supabaseUrl.includes('your-project')) {
+// Ne créer le client que côté client pour éviter les problèmes SSR
+if (!isClient) {
+  console.log("[SUPABASE] ⚠️ Server-side: creating placeholder client");
+  supabaseBrowser = {
+    auth: {
+      getSession: () => Promise.resolve({ data: { session: null }, error: null }),
+      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+      signInWithOtp: () => Promise.resolve({ data: null, error: { message: "Server-side client" } }),
+      signOut: () => Promise.resolve({ error: null })
+    }
+  };
+} else if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('placeholder') || supabaseUrl.includes('your-project')) {
   console.error("[SUPABASE] ❌ Variables d'environnement Supabase manquantes ou invalides", {
     hasUrl: !!supabaseUrl,
     hasKey: !!supabaseAnonKey,

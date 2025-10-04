@@ -8,6 +8,11 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Ne s'exécuter que côté client
+    if (typeof window === 'undefined') {
+      setLoading(false);
+      return;
+    }
     // Récupérer la session actuelle
     const getSession = async () => {
       try {
