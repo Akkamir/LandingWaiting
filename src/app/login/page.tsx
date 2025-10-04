@@ -69,75 +69,39 @@ export default function LoginPage() {
       }
       
       // Préparation de la requête - rediriger vers le callback
-      const redirectTo = typeof window !== "undefined" && typeof location !== "undefined" ? `${location.origin}/auth/callback` : undefined;
-      
-      console.log("[LOGIN] 📤 Sending Supabase auth.signInWithOtp request", {
-        email,
-        redirectTo,
-        requestTimestamp: new Date().toISOString()
-      });
-      
-      const requestStartTime = Date.now();
-      let data, error;
-      
+      // ⚠️ En local, évite que ce soit vide et évite les espaces/retours de ligne
+      const redirectTo =
+        typeof window !== "undefined"
+          ? `${location.origin}/auth/callback` // ex: http://localhost:3000/auth/callback
+          : undefined;
+
+      console.log('[LOGIN] emailRedirectTo =', redirectTo);
+
       try {
-        console.log("[LOGIN] 🔄 Calling supabase.auth.signInWithOtp...");
-        const result = await supabase.auth.signInWithOtp({
-          email,
-          options: { emailRedirectTo: redirectTo }
+        console.log('[LOGIN] 🔄 Calling supabase.auth.signInWithOtp...');
+        const { data, error } = await supabase.auth.signInWithOtp({
+          email: email.trim(),                // évite espaces
+          options: { emailRedirectTo: redirectTo },
         });
-        data = result.data;
-        error = result.error;
-        console.log("[LOGIN] ✅ Supabase call completed successfully");
+
+        if (error) {
+          console.error('[LOGIN] ❌ SUPABASE AUTH ERROR', { error });
+          setStatus('error');
+          setMessage(`Erreur Supabase: ${error.message}`);
+          return;
+        }
+
+        console.log('[LOGIN] ✅ OTP sent', { data });
+        setStatus('sent');
+        setMessage('Lien magique envoyé. Vérifie ta boîte mail.');
       } catch (supabaseError) {
-        console.error("[LOGIN] ❌ SUPABASE CALL FAILED", {
-          error: supabaseError,
-          message: supabaseError instanceof Error ? supabaseError.message : 'Unknown error',
-          stack: supabaseError instanceof Error ? supabaseError.stack : undefined,
-          name: supabaseError instanceof Error ? supabaseError.name : undefined,
-          type: typeof supabaseError,
-          timestamp: new Date().toISOString()
-        });
-        setStatus("error");
-        setMessage(`Erreur de connexion Supabase: ${supabaseError instanceof Error ? supabaseError.message : 'Erreur inconnue'}`);
+        console.error('[LOGIN] ❌ SUPABASE CALL FAILED', supabaseError);
+        setStatus('error');
+        setMessage(`Erreur de connexion Supabase: ${
+          supabaseError instanceof Error ? supabaseError.message : 'Erreur inconnue'
+        }`);
         return;
       }
-      
-      const requestDuration = Date.now() - requestStartTime;
-      
-      console.log("[LOGIN] 📥 Supabase response received", { 
-        data, 
-        error,
-        requestDuration: `${requestDuration}ms`,
-        responseTimestamp: new Date().toISOString(),
-        hasData: !!data,
-        hasError: !!error,
-        errorType: error?.name,
-        errorMessage: error?.message,
-        errorStatus: error?.status
-      });
-      
-      if (error) {
-        console.error("[LOGIN] ❌ SUPABASE AUTH ERROR", { 
-          error: error.message, 
-          code: error.status,
-          name: error.name,
-          details: error,
-          stack: error.stack,
-          requestDuration: `${requestDuration}ms`
-        });
-        setStatus("error");
-        setMessage(`Erreur Supabase: ${error.message}`);
-        return;
-      }
-      
-      console.log("[LOGIN] ✅ SUCCESS - OTP sent successfully", { 
-        data,
-        requestDuration: `${requestDuration}ms`,
-        totalDuration: `${Date.now() - startTime}ms`
-      });
-      setStatus("sent");
-      setMessage("Lien magique envoyé. Vérifie ta boîte mail.");
       
     } catch (err) {
       const errorDuration = Date.now() - startTime;
