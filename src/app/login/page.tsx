@@ -2,14 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-// Import sécurisé du client Supabase
-let supabaseBrowser: any = null;
-try {
-  const { supabaseBrowser: client } = require("@/lib/supabaseClientBrowser");
-  supabaseBrowser = client;
-} catch (error) {
-  console.error("[LOGIN] ❌ Failed to import Supabase client", error);
-}
+import { createClient } from "@/lib/supabaseClientBrowserSSR";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -31,11 +24,13 @@ export default function LoginPage() {
       target: e.target
     });
     
-    // Vérifier si le client Supabase est disponible
-    if (!supabaseBrowser || !supabaseBrowser.auth) {
+    // Créer le client Supabase
+    const supabase = createClient();
+    
+    if (!supabase || !supabase.auth) {
       console.error("[LOGIN] ❌ SUPABASE CLIENT NOT AVAILABLE", { 
-        supabaseBrowser: !!supabaseBrowser,
-        auth: supabaseBrowser?.auth ? 'available' : 'missing',
+        supabase: !!supabase,
+        auth: supabase?.auth ? 'available' : 'missing',
         timestamp: new Date().toISOString()
       });
       setStatus("error");
@@ -46,8 +41,8 @@ export default function LoginPage() {
     try {
       console.log("[LOGIN] ✅ Configuration OK, proceeding with Supabase auth", {
         email,
-        supabaseClientExists: !!supabaseBrowser,
-        supabaseClientAuth: !!supabaseBrowser?.auth,
+        supabaseClientExists: !!supabase,
+        supabaseClientAuth: !!supabase?.auth,
         timestamp: new Date().toISOString()
       });
 
@@ -92,8 +87,8 @@ export default function LoginPage() {
       let data, error;
       
       try {
-        console.log("[LOGIN] 🔄 Calling supabaseBrowser.auth.signInWithOtp...");
-        const result = await supabaseBrowser.auth.signInWithOtp(requestPayload);
+        console.log("[LOGIN] 🔄 Calling supabase.auth.signInWithOtp...");
+        const result = await supabase.auth.signInWithOtp(requestPayload);
         data = result.data;
         error = result.error;
         console.log("[LOGIN] ✅ Supabase call completed successfully");
