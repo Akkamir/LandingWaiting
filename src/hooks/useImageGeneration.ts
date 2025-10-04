@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { createClient } from "@/lib/supabaseClientBrowserSSR";
+import { createBrowserSupabase } from "@/lib/supabaseClient";
 import { validateImageFile } from "@/lib/utils";
 
 export function useImageGeneration() {
@@ -50,7 +50,7 @@ export function useImageGeneration() {
       formData.append("prompt", prompt);
 
       // Récupérer le JWT de l'utilisateur
-      const supabase = createClient();
+      const supabase = createBrowserSupabase();
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData.session?.access_token;
 

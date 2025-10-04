@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-import { createClient } from "@/lib/supabaseClientBrowserSSR";
+import { createBrowserSupabase } from "@/lib/supabaseClient";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -25,7 +25,7 @@ export default function LoginPage() {
     });
     
     // Créer le client Supabase
-    const supabase = createClient();
+    const supabase = createBrowserSupabase();
     
     if (!supabase || !supabase.auth) {
       console.error("[LOGIN] ❌ SUPABASE CLIENT NOT AVAILABLE", { 
@@ -68,8 +68,8 @@ export default function LoginPage() {
         }
       }
       
-      // Préparation de la requête
-      const redirectTo = typeof window !== "undefined" && typeof location !== "undefined" ? `${location.origin}/generate` : undefined;
+      // Préparation de la requête - rediriger vers le callback
+      const redirectTo = typeof window !== "undefined" && typeof location !== "undefined" ? `${location.origin}/auth/callback` : undefined;
       const requestPayload = { 
         email, 
         options: { 

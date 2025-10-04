@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabaseClientBrowserSSR";
+import { createBrowserSupabase } from "@/lib/supabaseClient";
 import type { User } from "@supabase/supabase-js";
 
 export function useAuth() {
@@ -17,7 +17,7 @@ export function useAuth() {
 
     console.log("[AUTH] 🔍 Checking for existing session...");
     
-    const supabase = createClient();
+    const supabase = createBrowserSupabase();
     
     console.log("[AUTH] 📋 Session check result:", {
       hasClient: !!supabase,
@@ -63,7 +63,7 @@ export function useAuth() {
 
   const signOut = async () => {
     try {
-      const supabase = createClient();
+      const supabase = createBrowserSupabase();
       await supabase.auth.signOut();
       setUser(null);
     } catch (error) {
