@@ -86,7 +86,7 @@ export default function Hero({ email, status, message, onEmailChange, onSubmit }
                     <div className="flex flex-col sm:flex-row gap-3 w-full">
                       <input
                         type="email"
-                        className="input-ghost flex-1 min-h-[48px]"
+                        className="input-ghost sm:input-bar flex-1 min-h-[48px]"
                         placeholder="Ton email pour accéder en priorité"
                         value={email}
                         onChange={(e) => onEmailChange(e.target.value)}
