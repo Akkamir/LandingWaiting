@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
-import ServiceWorkerProvider from "@/components/ServiceWorkerProvider";
 
 // Optimisation: Preload de la police critique
 const inter = Inter({
@@ -87,9 +86,7 @@ export default function RootLayout({
         }} />
       </head>
       <body className="antialiased bg-app">
-        <ServiceWorkerProvider>
-          {children}
-        </ServiceWorkerProvider>
+        {children}
         <SpeedInsights />
       </body>
     </html>

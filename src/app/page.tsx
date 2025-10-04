@@ -11,6 +11,7 @@ import LazySection from "@/components/LazySection";
 import { useOptimizedAnimations } from "@/components/OptimizedAnimations";
 import { useWaitlistForm } from "@/hooks/useWaitlistForm";
 import { usePerformance } from "@/hooks/usePerformance";
+import { useServiceWorker } from "@/hooks/useServiceWorker";
 
 // Optimisation: Lazy loading des sections non-critiques
 const FeaturesSection = dynamic(() => import("@/components/sections/FeaturesSection").then(mod => ({ default: mod.FeaturesSection })), {
@@ -39,6 +40,7 @@ export default function Home() {
   // Hooks personnalisés
   useOptimizedAnimations();
   usePerformance();
+  useServiceWorker(); // Service Worker pour le cache des assets
   const waitlistForm = useWaitlistForm();
 
   // Toast auto-hide
