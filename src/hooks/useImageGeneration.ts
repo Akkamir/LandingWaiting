@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { validateImageFile } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/components/providers/ClientAuthProvider";
 
 export function useImageGeneration() {
   const [file, setFile] = useState<File | null>(null);

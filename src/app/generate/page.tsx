@@ -9,7 +9,7 @@ import { PlatformSizePresets, type SizePreset } from "@/components/ui/PlatformSi
 import { PrivacyControls, type PrivacySettings } from "@/components/ui/PrivacyControls";
 import { BeforeAfterSlider } from "@/components/ui/BeforeAfterSlider";
 import { useImageGeneration } from "@/hooks/useImageGeneration";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/components/providers/ClientAuthProvider";
 import { AuthModal } from "@/components/auth/AuthModal";
 
 export default function GeneratePage() {

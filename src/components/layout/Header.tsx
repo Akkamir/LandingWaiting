@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useHoverOptimization } from "@/components/OptimizedAnimations";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/components/providers/ClientAuthProvider";
 import { useState } from "react";
 import { AuthModal } from "@/components/auth/AuthModal";
 
