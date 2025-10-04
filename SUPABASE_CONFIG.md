@@ -4,8 +4,8 @@
 
 ### 1. Authentication → URL Configuration
 
-- **SITE URL** : `http://localhost:3003`
-- **Authorized Redirect URLs** : `http://localhost:3003/auth/callback`
+- **SITE URL** : `http://localhost:3000`
+- **Authorized Redirect URLs** : `http://localhost:3000/auth/callback`
 
 ### 2. Email Templates (CRITIQUE)
 
@@ -40,7 +40,7 @@
 
 ## ⚠️ Points d'Attention
 
-- **Origine** : Utilise toujours `http://localhost:3003` (pas 127.0.0.1)
+- **Origine** : Utilise toujours `http://localhost:3000` (pas 127.0.0.1)
 - **Middleware** : Doit être à la racine du projet (`middleware.ts`)
 - **Matcher** : `['/(.*)']` pour couvrir toutes les routes
 - **Redirect URLs** : Ajoute `/auth/callback` dans les URLs autorisées
