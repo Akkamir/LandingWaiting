@@ -1,136 +1,150 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseServer } from '@/lib/auth/supabase';
-import { logSecurityEvent } from '@/lib/auth/security';
 
-// Routes protégées
-const protectedRoutes = ['/generate', '/profile', '/settings'];
-const authRoutes = ['/auth/login', '/auth/register'];
-
-// Fonction pour vérifier l'authentification
-async function verifyAuth(request: NextRequest): Promise<{ user: any; error: any }> {
-  try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
-    
-    if (!token) {
-      return { user: null, error: 'No token provided' };
-    }
-
-    const { data: { user }, error } = await supabaseServer.auth.getUser(token);
-    
-    if (error) {
-      logSecurityEvent('middleware_auth_error', { error, path: request.nextUrl.pathname }, 'warn');
-      return { user: null, error };
-    }
-
-    return { user, error: null };
-  } catch (error) {
-    logSecurityEvent('middleware_auth_exception', { error, path: request.nextUrl.pathname }, 'error');
-    return { user: null, error };
-  }
-}
-
-// Fonction pour vérifier les rôles
-function checkRole(user: any, requiredRoles: string[]): boolean {
-  if (!user || !user.role) return false;
-  return requiredRoles.includes(user.role);
-}
-
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-
-  // Log des requêtes suspectes
-  logSecurityEvent('request_received', { 
-    path: pathname, 
-    ip, 
-    userAgent: request.headers.get('user-agent'),
-    method: request.method 
-  });
-
-  // Vérifier si c'est une route protégée
-  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
-  const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
-
-  if (isProtectedRoute) {
-    const { user, error } = await verifyAuth(request);
-    
-    if (error || !user) {
-      logSecurityEvent('unauthorized_access_attempt', { 
-        path: pathname, 
-        ip, 
-        error: error?.message 
-      }, 'warn');
-      
-      return NextResponse.redirect(new URL('/auth/login', request.url));
-    }
-
-    // Vérifier les rôles pour certaines routes
-    if (pathname.startsWith('/admin') && !checkRole(user, ['admin'])) {
-      logSecurityEvent('insufficient_permissions', { 
-        path: pathname, 
-        ip, 
-        userId: user.id,
-        userRole: user.role 
-      }, 'warn');
-      
-      return NextResponse.redirect(new URL('/unauthorized', request.url));
-    }
-  }
-
-  // Redirection si l'utilisateur est déjà connecté et essaie d'accéder aux pages d'auth
-  if (isAuthRoute) {
-    const { user } = await verifyAuth(request);
-    
-    if (user) {
-      logSecurityEvent('authenticated_user_auth_route', { 
-        path: pathname, 
-        userId: user.id 
-      });
-      
-      return NextResponse.redirect(new URL('/generate', request.url));
-    }
-  }
-
-  // Headers de sécurité
-  const response = NextResponse.next();
-  
-  // Headers de sécurité
-  response.headers.set('X-Content-Type-Options', 'nosniff');
-  response.headers.set('X-Frame-Options', 'DENY');
-  response.headers.set('X-XSS-Protection', '1; mode=block');
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  
-  // CSP (Content Security Policy)
-  const csp = [
+// Headers de sécurité complets
+const securityHeaders = {
+  // Content Security Policy - Protection contre XSS
+  'Content-Security-Policy': [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://va.vercel-scripts.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https: blob:",
-    "connect-src 'self' https://*.supabase.co https://*.supabase.in https://api.replicate.com https://*.replicate.delivery",
-    "frame-src 'none'",
-    "object-src 'none'",
+    "connect-src 'self' https://*.supabase.co https://api.replicate.com https://www.google-analytics.com",
+    "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
-    "frame-ancestors 'none'",
-    "upgrade-insecure-requests"
-  ].join('; ');
+    "object-src 'none'",
+    "media-src 'self'",
+    "worker-src 'self' blob:",
+    "child-src 'self' blob:",
+    "frame-src 'none'"
+  ].join('; '),
   
-  response.headers.set('Content-Security-Policy', csp);
+  // HTTP Strict Transport Security - Protection MITM
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
   
-  // Headers de cache pour les assets statiques
-  if (pathname.startsWith('/_next/static/') || pathname.startsWith('/favicon.ico')) {
-    response.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+  // X-Content-Type-Options - Protection MIME sniffing
+  'X-Content-Type-Options': 'nosniff',
+  
+  // X-Frame-Options - Protection clickjacking
+  'X-Frame-Options': 'DENY',
+  
+  // Referrer Policy - Contrôle des informations de référence
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  
+  // Permissions Policy - Contrôle des APIs du navigateur
+  'Permissions-Policy': [
+    'camera=()',
+    'microphone=()',
+    'geolocation=()',
+    'interest-cohort=()',
+    'payment=()',
+    'usb=()',
+    'magnetometer=()',
+    'gyroscope=()',
+    'accelerometer=()'
+  ].join(', '),
+  
+  // X-XSS-Protection - Protection XSS legacy
+  'X-XSS-Protection': '1; mode=block',
+  
+  // Cache Control pour les pages sensibles
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  'Pragma': 'no-cache',
+  'Expires': '0'
+};
+
+// Rate limiting simple (en production, utiliser Redis ou similaire)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX_REQUESTS = 30; // 30 requêtes par minute (plus généreux pour le développement)
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const userLimit = rateLimitMap.get(ip);
+  
+  if (!userLimit || now > userLimit.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return true;
   }
   
-  // Headers pour les API
+  if (userLimit.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return false;
+  }
+  
+  userLimit.count++;
+  return true;
+}
+
+// Validation des headers de requête suspects
+function validateRequestHeaders(request: NextRequest): boolean {
+  const userAgent = request.headers.get('user-agent');
+  const contentType = request.headers.get('content-type');
+  
+  // Bloquer les user agents suspects
+  if (userAgent && (
+    userAgent.includes('sqlmap') ||
+    userAgent.includes('nikto') ||
+    userAgent.includes('nmap') ||
+    userAgent.includes('masscan') ||
+    userAgent.length > 1000 // User agent anormalement long
+  )) {
+    return false;
+  }
+  
+  // Valider le content-type pour les requêtes POST
+  if (request.method === 'POST') {
+    if (!contentType || (
+      !contentType.includes('application/json') &&
+      !contentType.includes('multipart/form-data') &&
+      !contentType.includes('application/x-www-form-urlencoded')
+    )) {
+      return false;
+    }
+  }
+  
+  return true;
+}
+
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+  
+  // Log des tentatives suspectes
+  if (!validateRequestHeaders(request)) {
+    console.warn(`[SECURITY] Request blocked from ${ip}:`, {
+      userAgent: request.headers.get('user-agent'),
+      contentType: request.headers.get('content-type'),
+      pathname
+    });
+    return new NextResponse('Forbidden', { status: 403 });
+  }
+  
+  // Rate limiting pour les API (désactivé en développement)
+  if (pathname.startsWith('/api/') && process.env.NODE_ENV === 'production') {
+    if (!checkRateLimit(ip)) {
+      console.warn(`[SECURITY] Rate limit exceeded for ${ip}`);
+      return new NextResponse('Too Many Requests', { status: 429 });
+    }
+  }
+  
+  // Redirection HTTPS en production
+  if (process.env.NODE_ENV === 'production' && request.headers.get('x-forwarded-proto') !== 'https') {
+    return NextResponse.redirect(`https://${request.headers.get('host')}${pathname}`, 301);
+  }
+  
+  // Application des headers de sécurité
+  const response = NextResponse.next();
+  
+  Object.entries(securityHeaders).forEach(([key, value]) => {
+    response.headers.set(key, value);
+  });
+  
+  // Headers spécifiques pour les API
   if (pathname.startsWith('/api/')) {
     response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
-    response.headers.set('Pragma', 'no-cache');
-    response.headers.set('Expires', '0');
   }
-
+  
   return response;
 }
 

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { AuthProvider } from "@/lib/auth/auth-provider";
 import "./globals.css";
 
 // Optimisation: Preload de la police critique
@@ -54,9 +53,7 @@ export default function RootLayout({
         }} />
       </head>
       <body className="antialiased bg-app">
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        {children}
         <SpeedInsights />
       </body>
     </html>

@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { AuthGuard } from "@/components/auth/AuthGuard";
 import { ImageUpload } from "@/components/generate/ImageUpload";
 import { ImagePreview } from "@/components/generate/ImagePreview";
 import { PresetPills, type Preset } from "@/components/ui/PresetPills";
@@ -43,7 +42,7 @@ export default function GeneratePage() {
   }, [previewUrl]);
 
   return (
-    <AuthGuard requireAuth={true} redirectTo="/auth/login">
+    <>
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-md">
         <div className="container py-3 flex items-center justify-between">
           <Link href="/" className="font-semibold tracking-tight">ImageAI</Link>
@@ -183,7 +182,7 @@ export default function GeneratePage() {
         </div>
       </div>
       </section>
-    </AuthGuard>
+    </>
   );
 }
 
