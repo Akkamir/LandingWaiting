@@ -4,6 +4,8 @@ import dynamic from "next/dynamic";
 import NoSSR from "./NoSSR";
 import Head from "next/head";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 
 // Optimisation: Lazy loading de Lottie pour éviter le blocage du rendu initial
 const LottieAnimation = dynamic(() => import("./LottieAnimation"), {
@@ -26,6 +28,15 @@ type HeroProps = {
 export default function Hero({ email, status, message, onEmailChange, onSubmit }: HeroProps) {
   const [isVisible, setIsVisible] = useState(false);
   const { trackEvent } = useAnalytics();
+  const { isAuthenticated, loading } = useAuth();
+  const router = useRouter();
+
+  // Redirection automatique si déjà connecté
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      router.push('/generate');
+    }
+  }, [isAuthenticated, loading, router]);
 
   // Optimisation: Intersection Observer pour charger Lottie seulement quand visible
   useEffect(() => {
@@ -82,52 +93,68 @@ export default function Hero({ email, status, message, onEmailChange, onSubmit }
               <span>4.9/5</span>
             </div>
           </div>
-                  <form className="mt-6" onSubmit={onSubmit} role="form" aria-label="Formulaire d'inscription à la liste d'attente">
-                    <div className="flex flex-col sm:flex-row gap-3 w-full">
-                      <input
-                        type="email"
-                        className="flex-1 min-h-[48px] bg-white/5 backdrop-blur-sm rounded-full px-4 py-2 text-white placeholder-gray-400 border border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                        placeholder="Ton email pour accéder en priorité"
-                        value={email}
-                        onChange={(e) => onEmailChange(e.target.value)}
-                        disabled={status === "loading"}
-                        aria-label="Adresse e-mail"
-                        aria-describedby="email-help"
-                        aria-invalid={status === "error"}
-                        required
-                        autoComplete="email"
-                        autoCapitalize="none"
-                        autoCorrect="off"
-                        spellCheck="false"
-                      />
+                  {loading ? (
+                    <div className="mt-6 flex justify-center">
+                      <div className="w-8 h-8 border-4 border-white/20 border-t-white/60 rounded-full animate-spin" />
+                    </div>
+                  ) : isAuthenticated ? (
+                    <div className="mt-6">
                       <button
-                        type="submit"
-                        aria-label="Rejoindre la liste d'attente"
-                        className="btn-primary btn-xl w-full sm:w-auto justify-center text-sm sm:text-base md:text-lg font-bold shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 whitespace-nowrap min-h-[48px] min-w-[48px] bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 border-0 text-white px-5 sm:px-7"
-                        disabled={status === "loading"}
-                        aria-describedby="submit-help"
+                        onClick={() => router.push('/generate')}
+                        className="btn-primary btn-xl w-full justify-center text-sm sm:text-base md:text-lg font-bold shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 whitespace-nowrap min-h-[48px] min-w-[48px] bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 border-0 text-white px-5 sm:px-7"
+                        aria-label="Transformer mes images"
                       >
-                        {status === "loading" ? (
-                          <>
-                            <span className="sr-only">Inscription en cours</span>
-                            <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin mr-2" />
-                            Inscription…
-                          </>
-                        ) : (
-                          <>
-                            🚀 Essayer gratuitement
-                            <span className="hidden sm:inline"> </span>
-                          </>
-                        )}
+                        🚀 Transformer mes images
                       </button>
                     </div>
-            <div id="email-help" className="sr-only">
-              Saisissez votre adresse e-mail pour rejoindre la liste d'attente
-            </div>
-            <div id="submit-help" className="sr-only">
-              Cliquez pour vous inscrire à la liste d'attente
-            </div>
-          </form>
+                  ) : (
+                    <form className="mt-6" onSubmit={onSubmit} role="form" aria-label="Formulaire d'inscription à la liste d'attente">
+                      <div className="flex flex-col sm:flex-row gap-3 w-full">
+                        <input
+                          type="email"
+                          className="flex-1 min-h-[48px] bg-white/5 backdrop-blur-sm rounded-full px-4 py-2 text-white placeholder-gray-400 border border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                          placeholder="Ton email pour accéder en priorité"
+                          value={email}
+                          onChange={(e) => onEmailChange(e.target.value)}
+                          disabled={status === "loading"}
+                          aria-label="Adresse e-mail"
+                          aria-describedby="email-help"
+                          aria-invalid={status === "error"}
+                          required
+                          autoComplete="email"
+                          autoCapitalize="none"
+                          autoCorrect="off"
+                          spellCheck="false"
+                        />
+                        <button
+                          type="submit"
+                          aria-label="Rejoindre la liste d'attente"
+                          className="btn-primary btn-xl w-full sm:w-auto justify-center text-sm sm:text-base md:text-lg font-bold shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 whitespace-nowrap min-h-[48px] min-w-[48px] bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 border-0 text-white px-5 sm:px-7"
+                          disabled={status === "loading"}
+                          aria-describedby="submit-help"
+                        >
+                          {status === "loading" ? (
+                            <>
+                              <span className="sr-only">Inscription en cours</span>
+                              <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin mr-2" />
+                              Inscription…
+                            </>
+                          ) : (
+                            <>
+                              🚀 Essayer gratuitement
+                              <span className="hidden sm:inline"> </span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <div id="email-help" className="sr-only">
+                        Saisissez votre adresse e-mail pour rejoindre la liste d'attente
+                      </div>
+                      <div id="submit-help" className="sr-only">
+                        Cliquez pour vous inscrire à la liste d'attente
+                      </div>
+                    </form>
+                  )}
           {message && (
             <div
               role="status"
