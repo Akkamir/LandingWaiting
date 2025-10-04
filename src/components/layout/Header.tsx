@@ -13,7 +13,7 @@ const navigationItems = [
 
 export function Header() {
   const { handleMouseEnter, handleMouseLeave } = useHoverOptimization();
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   return (
@@ -41,7 +41,11 @@ export function Header() {
           ))}
         </nav>
         
-        {user ? (
+        {loading ? (
+          <div className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/90">
+            <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+          </div>
+        ) : user ? (
           <div className="flex items-center gap-3">
             <span className="text-sm text-white/60">
               {user.email}
