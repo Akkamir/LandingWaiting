@@ -42,8 +42,12 @@ export default function LottieAnimation({ className }: LottieAnimationProps) {
 
   const loadAnimation = async () => {
     try {
-      // Optimisation: Import dynamique du JSON Lottie
-      const animationData = await import("../../public/Bouncing Square.json");
+      // Optimisation: Fetch du JSON Lottie (plus robuste en production)
+      const response = await fetch("/Bouncing Square.json");
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const animationData = await response.json();
       
       if (containerRef.current) {
         animationRef.current = lottie.loadAnimation({
@@ -51,7 +55,7 @@ export default function LottieAnimation({ className }: LottieAnimationProps) {
           renderer: "svg", // SVG plus léger que canvas
           loop: true,
           autoplay: true,
-          animationData: animationData.default,
+          animationData: animationData,
           // Optimisations de performance
           rendererSettings: {
             preserveAspectRatio: "xMidYMid slice",
@@ -73,6 +77,7 @@ export default function LottieAnimation({ className }: LottieAnimationProps) {
       }
     } catch (error) {
       console.error("Erreur de chargement Lottie:", error);
+      console.error("URL tentée:", "/Bouncing Square.json");
       setHasError(true);
     }
   };
@@ -96,7 +101,8 @@ export default function LottieAnimation({ className }: LottieAnimationProps) {
         <div className="w-full h-full flex items-center justify-center text-white/60">
           <div className="text-center">
             <div className="text-4xl mb-2">🎯</div>
-            <div className="text-sm">Animation en cours de chargement...</div>
+            <div className="text-sm">Animation Lottie</div>
+            <div className="text-xs text-white/40 mt-1">Chargement en cours...</div>
           </div>
         </div>
       )}

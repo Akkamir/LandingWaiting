@@ -12,6 +12,7 @@ import { useOptimizedAnimations } from "@/components/OptimizedAnimations";
 import { useWaitlistForm } from "@/hooks/useWaitlistForm";
 import { usePerformance } from "@/hooks/usePerformance";
 import { useServiceWorker } from "@/hooks/useServiceWorker";
+import LottieTest from "@/components/LottieTest";
 
 // Optimisation: Lazy loading des sections non-critiques
 const FeaturesSection = dynamic(() => import("@/components/sections/FeaturesSection").then(mod => ({ default: mod.FeaturesSection })), {
@@ -60,6 +61,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <LottieTest />
       <Header />
 
       <main className="flex-1">
