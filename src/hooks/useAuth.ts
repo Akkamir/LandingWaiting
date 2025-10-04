@@ -25,7 +25,7 @@ export function useAuth() {
     });
     
     // Vérifier la session existante
-    supabase.auth.getSession().then(({ data, error }) => {
+    supabase.auth.getSession().then(({ data, error }: { data: any, error: any }) => {
       const session = data.session;
       console.log("[AUTH] 📋 Session check result:", {
         hasSession: !!session,
