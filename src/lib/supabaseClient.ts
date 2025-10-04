@@ -30,6 +30,9 @@ console.log("[SUPABASE] 🔧 Initializing Supabase client", {
 // Créer un client Supabase conditionnel
 let supabaseBrowser: any;
 
+// Vérifier si on est côté client
+const isClient = typeof window !== 'undefined';
+
 if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('placeholder') || supabaseUrl.includes('your-project')) {
   console.error("[SUPABASE] ❌ Variables d'environnement Supabase manquantes ou invalides", {
     hasUrl: !!supabaseUrl,
@@ -41,7 +44,7 @@ if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('placeholder') || s
   });
   
   // En mode build, créer un client placeholder pour éviter l'échec du build
-  if (process.env.NODE_ENV === 'production' && typeof window === 'undefined') {
+  if (process.env.NODE_ENV === 'production' && !isClient) {
     console.warn("[SUPABASE] ⚠️ Build mode: création d'un client placeholder");
     supabaseBrowser = {
       auth: {
@@ -52,15 +55,17 @@ if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('placeholder') || s
     throw new Error("Configuration Supabase manquante. Vérifiez vos variables d'environnement.");
   }
 } else {
-  console.log("[SUPABASE] 📦 Creating Supabase client with config", {
-    url: supabaseUrl,
-    keyLength: supabaseAnonKey.length,
-    authConfig: {
-      persistSession: true,
-      autoRefreshToken: true
-    },
-    globalHeaders: { "X-Client-Info": "imageai-browser" }
-  });
+console.log("[SUPABASE] 📦 Creating Supabase client with config", {
+  url: supabaseUrl,
+  keyLength: supabaseAnonKey.length,
+  isClient,
+  isServer: !isClient,
+  authConfig: {
+    persistSession: true,
+    autoRefreshToken: true
+  },
+  globalHeaders: { "X-Client-Info": "imageai-browser" }
+});
 
   supabaseBrowser = createClient(
     supabaseUrl,
