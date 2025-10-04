@@ -31,7 +31,7 @@ export default function Hero({ email, status, message, onEmailChange, onSubmit }
   const { isAuthenticated, loading, user } = useAuth();
   const router = useRouter();
 
-  // Redirection automatique si déjà connecté
+  // Redirection automatique si déjà connecté (seulement si on vient de se connecter)
   useEffect(() => {
     console.log("[HERO] 🔍 Auth check for redirect:", {
       loading,
@@ -41,9 +41,18 @@ export default function Hero({ email, status, message, onEmailChange, onSubmit }
       timestamp: new Date().toISOString()
     });
     
+    // Ne rediriger que si l'utilisateur vient de se connecter (pas à chaque visite)
+    // On peut détecter cela en vérifiant si on vient de la page de callback
     if (!loading && isAuthenticated) {
-      console.log("[HERO] 🚀 Redirecting to /generate - user is authenticated");
-      router.push('/generate');
+      const referrer = document.referrer;
+      const isFromCallback = referrer.includes('/auth/callback') || referrer.includes('/login');
+      
+      if (isFromCallback) {
+        console.log("[HERO] 🚀 Redirecting to /generate - user just authenticated");
+        router.push('/generate');
+      } else {
+        console.log("[HERO] ℹ️ User is authenticated but not redirecting (not from auth flow)");
+      }
     }
   }, [isAuthenticated, loading, router, user]);
 
