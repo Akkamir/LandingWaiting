@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { validateImageFile } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function useImageGeneration() {
   const [file, setFile] = useState<File | null>(null);
@@ -8,6 +9,7 @@ export function useImageGeneration() {
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<"original" | "result" | "side">("original");
+  const { session } = useAuth();
 
   const handleFileChange = useCallback((selectedFile: File | null) => {
     setError(null);
@@ -50,6 +52,9 @@ export function useImageGeneration() {
 
       const res = await fetch("/api/generate", { 
         method: "POST", 
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`
+        },
         body: formData 
       });
       

@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import Replicate from "replicate";
 import { randomUUID } from "crypto";
 import { validateInput, promptSchema, imageFileSchema, isValidUrl } from "@/lib/validation";
+import { supabase } from "@/lib/supabase";
 
 // Validation sécurisée des variables d'environnement
 function validateEnvironment() {
@@ -70,6 +71,23 @@ export async function POST(req: NextRequest) {
   console.log("[GENERATE] Starting generation request", { ip, projectId, timestamp: new Date().toISOString() });
   
   try {
+    // Vérification de l'authentification
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      console.warn(`[SECURITY] No auth token from ${ip}`);
+      return NextResponse.json({ error: "Authentification requise" }, { status: 401 });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      console.warn(`[SECURITY] Invalid auth token from ${ip}:`, authError?.message);
+      return NextResponse.json({ error: "Token invalide" }, { status: 401 });
+    }
+
+    console.log("[GENERATE] User authenticated:", { userId: user.id });
+
     // Validation de l'environnement
     const env = validateEnvironment();
     if (!env) {
@@ -235,9 +253,10 @@ export async function POST(req: NextRequest) {
     const { data: pubOutput } = supabase.storage.from("output-images").getPublicUrl(outputPath);
     const storedOutputUrl = pubOutput.publicUrl;
 
-    // Enregistrer en base
+    // Enregistrer en base avec user_id
     const { error: insertErr } = await supabase.from("projects").insert({
       id: projectId,
+      user_id: user.id,
       input_image_url: inputUrl,
       output_image_url: storedOutputUrl,
       prompt,

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ImageUpload } from "@/components/generate/ImageUpload";
 import { ImagePreview } from "@/components/generate/ImagePreview";
 import { PresetPills, type Preset } from "@/components/ui/PresetPills";
@@ -8,8 +9,14 @@ import { PlatformSizePresets, type SizePreset } from "@/components/ui/PlatformSi
 import { PrivacyControls, type PrivacySettings } from "@/components/ui/PrivacyControls";
 import { BeforeAfterSlider } from "@/components/ui/BeforeAfterSlider";
 import { useImageGeneration } from "@/hooks/useImageGeneration";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthModal } from "@/components/auth/AuthModal";
 
 export default function GeneratePage() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
   const {
     file,
     prompt,
@@ -24,6 +31,13 @@ export default function GeneratePage() {
     handleReset,
     handleDownload
   } = useImageGeneration();
+
+  // Rediriger si pas connecté
+  useEffect(() => {
+    if (!authLoading && !user) {
+      setShowAuthModal(true);
+    }
+  }, [user, authLoading]);
 
   // États pour les nouveaux composants
   const [selectedPreset, setSelectedPreset] = useState<string | undefined>();
@@ -182,6 +196,16 @@ export default function GeneratePage() {
         </div>
       </div>
       </section>
+
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => {
+          setShowAuthModal(false);
+          if (!user) {
+            router.push('/');
+          }
+        }} 
+      />
     </>
   );
 }
