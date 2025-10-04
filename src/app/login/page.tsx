@@ -31,53 +31,26 @@ export default function LoginPage() {
       target: e.target
     });
     
-    // Vérifier si Supabase est configuré
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    
-    console.log("[LOGIN] Environment variables detailed check", { 
-      hasUrl: !!supabaseUrl, 
-      hasKey: !!supabaseAnonKey,
-      urlValue: supabaseUrl,
-      urlLength: supabaseUrl?.length,
-      keyLength: supabaseAnonKey?.length,
-      keyPrefix: supabaseAnonKey?.substring(0, 10),
-      isPlaceholder: supabaseUrl?.includes('placeholder'),
-      isHttps: supabaseUrl?.startsWith('https://'),
-      allEnvVars: Object.keys(process.env).filter(k => k.includes('SUPABASE'))
-    });
-    
-    if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('placeholder')) {
-      console.error("[LOGIN] ❌ CONFIGURATION MANQUANTE", { 
-        supabaseUrl, 
-        supabaseAnonKey,
-        reason: !supabaseUrl ? 'NO_URL' : !supabaseAnonKey ? 'NO_KEY' : 'PLACEHOLDER_URL'
+    // Vérifier si le client Supabase est disponible
+    if (!supabaseBrowser || !supabaseBrowser.auth) {
+      console.error("[LOGIN] ❌ SUPABASE CLIENT NOT AVAILABLE", { 
+        supabaseBrowser: !!supabaseBrowser,
+        auth: supabaseBrowser?.auth ? 'available' : 'missing',
+        timestamp: new Date().toISOString()
       });
       setStatus("error");
-      setMessage("Configuration Supabase manquante. Veuillez configurer NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY dans .env.local");
+      setMessage("Client Supabase non disponible. Veuillez recharger la page.");
       return;
     }
     
     try {
       console.log("[LOGIN] ✅ Configuration OK, proceeding with Supabase auth", {
         email,
-        supabaseUrl,
         supabaseClientExists: !!supabaseBrowser,
         supabaseClientAuth: !!supabaseBrowser?.auth,
         timestamp: new Date().toISOString()
       });
 
-      // Vérification supplémentaire du client Supabase
-      if (!supabaseBrowser || !supabaseBrowser.auth) {
-        console.error("[LOGIN] ❌ SUPABASE CLIENT NOT AVAILABLE", {
-          supabaseBrowser: !!supabaseBrowser,
-          auth: supabaseBrowser?.auth ? 'available' : 'missing',
-          timestamp: new Date().toISOString()
-        });
-        setStatus("error");
-        setMessage("Client Supabase non disponible. Veuillez recharger la page.");
-        return;
-      }
       
       // Test de connectivité réseau détaillé
       if (typeof window !== "undefined" && typeof navigator !== "undefined" && typeof location !== "undefined") {
@@ -111,7 +84,6 @@ export default function LoginPage() {
       
       console.log("[LOGIN] 📤 Sending Supabase auth.signInWithOtp request", {
         payload: requestPayload,
-        supabaseUrl,
         redirectTo,
         requestTimestamp: new Date().toISOString()
       });
