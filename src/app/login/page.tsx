@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabaseBrowser } from "@/lib/supabaseClient";
 import Link from "next/link";
 
@@ -8,77 +8,168 @@ export default function LoginPage() {
   const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">("idle");
   const [message, setMessage] = useState("");
 
+  // Logs de diagnostic au montage du composant
+  useEffect(() => {
+    console.log("[LOGIN] Component mounted", {
+      timestamp: new Date().toISOString(),
+      userAgent: typeof window !== "undefined" ? navigator.userAgent : undefined,
+      location: typeof window !== "undefined" ? location.href : undefined,
+      referrer: typeof window !== "undefined" ? document.referrer : undefined
+    });
+
+    // Vérification des variables d'environnement au montage
+    console.log("[LOGIN] Environment variables check on mount", {
+      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? `${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.substring(0, 10)}...` : undefined,
+      NODE_ENV: process.env.NODE_ENV,
+      allEnvKeys: Object.keys(process.env).filter(key => key.startsWith('NEXT_PUBLIC_'))
+    });
+
+    // Test de connectivité réseau
+    if (typeof window !== "undefined") {
+      console.log("[LOGIN] Network diagnostics", {
+        online: navigator.onLine,
+        connection: (navigator as any).connection ? {
+          effectiveType: (navigator as any).connection.effectiveType,
+          downlink: (navigator as any).connection.downlink,
+          rtt: (navigator as any).connection.rtt
+        } : 'not available',
+        cookieEnabled: navigator.cookieEnabled,
+        doNotTrack: navigator.doNotTrack
+      });
+    }
+  }, []);
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
+    const startTime = Date.now();
     setStatus("loading");
     setMessage("");
     
-    console.log("[LOGIN] Starting login process", { email });
+    console.log("[LOGIN] ===== STARTING LOGIN PROCESS =====", { 
+      email,
+      timestamp: new Date().toISOString(),
+      formData: { email },
+      eventType: e.type,
+      target: e.target
+    });
     
     // Vérifier si Supabase est configuré
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     
-    console.log("[LOGIN] Environment check", { 
+    console.log("[LOGIN] Environment variables detailed check", { 
       hasUrl: !!supabaseUrl, 
       hasKey: !!supabaseAnonKey,
       urlValue: supabaseUrl,
-      isPlaceholder: supabaseUrl?.includes('placeholder')
+      urlLength: supabaseUrl?.length,
+      keyLength: supabaseAnonKey?.length,
+      keyPrefix: supabaseAnonKey?.substring(0, 10),
+      isPlaceholder: supabaseUrl?.includes('placeholder'),
+      isHttps: supabaseUrl?.startsWith('https://'),
+      allEnvVars: Object.keys(process.env).filter(k => k.includes('SUPABASE'))
     });
     
     if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('placeholder')) {
-      console.error("[LOGIN] Configuration manquante", { supabaseUrl, supabaseAnonKey });
+      console.error("[LOGIN] ❌ CONFIGURATION MANQUANTE", { 
+        supabaseUrl, 
+        supabaseAnonKey,
+        reason: !supabaseUrl ? 'NO_URL' : !supabaseAnonKey ? 'NO_KEY' : 'PLACEHOLDER_URL'
+      });
       setStatus("error");
       setMessage("Configuration Supabase manquante. Veuillez configurer NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY dans .env.local");
       return;
     }
     
     try {
-      console.log("[LOGIN] Attempting Supabase auth.signInWithOtp", {
+      console.log("[LOGIN] ✅ Configuration OK, proceeding with Supabase auth", {
         email,
-        redirectTo: typeof window !== "undefined" ? `${location.origin}/generate` : undefined,
         supabaseUrl,
-        currentOrigin: typeof window !== "undefined" ? location.origin : undefined,
-        userAgent: typeof window !== "undefined" ? navigator.userAgent : undefined
+        supabaseClientExists: !!supabaseBrowser,
+        supabaseClientAuth: !!supabaseBrowser?.auth,
+        timestamp: new Date().toISOString()
       });
       
-      // Test de connectivité réseau basique
+      // Test de connectivité réseau détaillé
       if (typeof window !== "undefined") {
-        console.log("[LOGIN] Network check", {
+        console.log("[LOGIN] Network diagnostics before request", {
           online: navigator.onLine,
-          connection: (navigator as any).connection?.effectiveType || 'unknown'
+          connection: (navigator as any).connection ? {
+            effectiveType: (navigator as any).connection.effectiveType,
+            downlink: (navigator as any).connection.downlink,
+            rtt: (navigator as any).connection.rtt,
+            saveData: (navigator as any).connection.saveData
+          } : 'not available',
+          currentOrigin: location.origin,
+          protocol: location.protocol,
+          hostname: location.hostname,
+          port: location.port
         });
       }
       
-      const { data, error } = await supabaseBrowser.auth.signInWithOtp({ 
+      // Préparation de la requête
+      const redirectTo = typeof window !== "undefined" ? `${location.origin}/generate` : undefined;
+      const requestPayload = { 
         email, 
         options: { 
-          emailRedirectTo: typeof window !== "undefined" ? `${location.origin}/generate` : undefined 
+          emailRedirectTo: redirectTo 
         } 
+      };
+      
+      console.log("[LOGIN] 📤 Sending Supabase auth.signInWithOtp request", {
+        payload: requestPayload,
+        supabaseUrl,
+        redirectTo,
+        requestTimestamp: new Date().toISOString()
       });
       
-      console.log("[LOGIN] Supabase response", { data, error });
+      const requestStartTime = Date.now();
+      const { data, error } = await supabaseBrowser.auth.signInWithOtp(requestPayload);
+      const requestDuration = Date.now() - requestStartTime;
+      
+      console.log("[LOGIN] 📥 Supabase response received", { 
+        data, 
+        error,
+        requestDuration: `${requestDuration}ms`,
+        responseTimestamp: new Date().toISOString(),
+        hasData: !!data,
+        hasError: !!error,
+        errorType: error?.name,
+        errorMessage: error?.message,
+        errorStatus: error?.status
+      });
       
       if (error) {
-        console.error("[LOGIN] Supabase auth error", { 
+        console.error("[LOGIN] ❌ SUPABASE AUTH ERROR", { 
           error: error.message, 
           code: error.status,
-          details: error
+          name: error.name,
+          details: error,
+          stack: error.stack,
+          requestDuration: `${requestDuration}ms`
         });
         setStatus("error");
         setMessage(`Erreur Supabase: ${error.message}`);
         return;
       }
       
-      console.log("[LOGIN] Success - OTP sent", { data });
+      console.log("[LOGIN] ✅ SUCCESS - OTP sent successfully", { 
+        data,
+        requestDuration: `${requestDuration}ms`,
+        totalDuration: `${Date.now() - startTime}ms`
+      });
       setStatus("sent");
       setMessage("Lien magique envoyé. Vérifie ta boîte mail.");
       
     } catch (err) {
-      console.error("[LOGIN] Unexpected error", { 
+      const errorDuration = Date.now() - startTime;
+      console.error("[LOGIN] ❌ UNEXPECTED ERROR", { 
         error: err instanceof Error ? err.message : 'Unknown error',
         stack: err instanceof Error ? err.stack : undefined,
-        name: err instanceof Error ? err.name : undefined
+        name: err instanceof Error ? err.name : undefined,
+        type: typeof err,
+        duration: `${errorDuration}ms`,
+        timestamp: new Date().toISOString()
       });
       setStatus("error");
       setMessage(`Erreur inattendue: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
