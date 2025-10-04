@@ -1,7 +1,7 @@
 'use client'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createBrowserSupabase } from '@/lib/supabaseClient'
 
 export default function AuthCallback() {
   const router = useRouter()
@@ -10,7 +10,7 @@ export default function AuthCallback() {
     (async () => {
       console.log('[AUTH-CALLBACK] 🔄 Processing magic link callback')
       
-      const supabase = createClientComponentClient()
+      const supabase = createBrowserSupabase()
       
       try {
         const { error } = await supabase.auth.getSession() // avale le hash ou échange le code
