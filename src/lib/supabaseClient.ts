@@ -5,6 +5,14 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+console.log("[SUPABASE] Initializing client", {
+  hasUrl: !!supabaseUrl,
+  hasKey: !!supabaseAnonKey,
+  urlValue: supabaseUrl,
+  keyLength: supabaseAnonKey?.length,
+  isPlaceholder: supabaseUrl?.includes('placeholder')
+});
+
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn("⚠️ Variables d'environnement Supabase manquantes. Créez un fichier .env.local avec NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY");
 }
@@ -22,5 +30,10 @@ export const supabaseBrowser = createClient(
     },
   }
 );
+
+console.log("[SUPABASE] Client created", {
+  url: supabaseBrowser.supabaseUrl,
+  isConnected: !!supabaseBrowser
+});
 
 
