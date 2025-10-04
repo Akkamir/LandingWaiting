@@ -36,7 +36,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="dns-prefetch" href="//fonts.gstatic.com" />
         {/* Favicon pour éviter l'erreur 500 */}
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         {/* Anti-FOUC: CSS critique inline */}
         <style dangerouslySetInnerHTML={{
           __html: `
