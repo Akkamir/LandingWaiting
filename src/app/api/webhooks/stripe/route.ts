@@ -70,6 +70,12 @@ export async function POST(req: NextRequest) {
           userId = existing?.user_id ?? null
         }
 
+        // Si on n'a toujours pas de user_id (ex: ordre d'événements), ne pas échouer le webhook
+        if (!userId) {
+          // On attendra 'checkout.session.completed' pour créer la ligne (qui possède metadata.user_id)
+          break
+        }
+
         // Upsert en incluant user_id (NOT NULL)
         await supabase.from('subscriptions').upsert({
           user_id: userId as string, // peut être null si non retrouvable; la DB lèvera une erreur et sera catchée
