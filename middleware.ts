@@ -29,7 +29,26 @@ export async function middleware(request: NextRequest) {
   )
 
   // IMPORTANT: Ensures session is loaded/refreshed and stored in HttpOnly cookies
-  await supabase.auth.getSession()
+  const { data: sessionData } = await supabase.auth.getSession()
+
+  const pathname = request.nextUrl.pathname
+  const isProtectedPage = pathname.startsWith('/dashboard')
+  const isProtectedApi = pathname.startsWith('/api')
+
+  // Protéger pages (rediriger vers /login)
+  if (isProtectedPage && !sessionData.session) {
+    const url = new URL('/login', request.url)
+    url.searchParams.set('redirectedFrom', pathname)
+    return NextResponse.redirect(url)
+  }
+
+  // Protéger API (401 JSON)
+  if (isProtectedApi && !sessionData.session) {
+    return new Response(JSON.stringify({ error: 'Non authentifié' }), {
+      status: 401,
+      headers: { 'content-type': 'application/json' },
+    })
+  }
 
   return supabaseResponse
 }

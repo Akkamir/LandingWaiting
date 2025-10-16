@@ -8,19 +8,31 @@ export default function AuthCallback() {
 
   useEffect(() => {
     (async () => {
-      console.log('[AUTH-CALLBACK] 🔄 Processing magic link callback')
-      
       const supabase = createBrowserSupabase()
-      
+      const href = typeof window !== 'undefined' ? window.location.href : null
+      const code = href ? new URL(href).searchParams.get('code') : null
       try {
-        const { error } = await supabase.auth.getSession() // avale le hash ou échange le code
-        if (error) {
-          console.error('[CALLBACK] getSession error:', error.message)
+        // 1) Si la session est déjà présente (middleware ou retour OAuth), ne pas ré-échanger
+        const { data: s1, error: sErr } = await supabase.auth.getSession()
+        if (sErr) {
+          console.error('[CALLBACK] getSession error:', sErr.message)
           router.replace('/login?error=callback_error')
           return
         }
-        // Redirection vers la page d'accueil - laisse l'utilisateur choisir
-        router.replace('/')
+        if (!s1?.session && code) {
+          // 2) Pas de session et présence d'un code => échanger une seule fois
+          const { error } = await supabase.auth.exchangeCodeForSession(href!)
+          if (error) {
+            console.error('[CALLBACK] exchangeCode error:', error.message)
+            router.replace('/login?error=callback_error')
+            return
+          }
+        }
+        const href = typeof window !== 'undefined' ? window.location.href : null
+        const sp = href ? new URL(href).searchParams : null
+        const intended = sp?.get('redirectedFrom') || (typeof window !== 'undefined' ? localStorage.getItem('post_auth_redirect') : null) || '/generate'
+        if (typeof window !== 'undefined') localStorage.removeItem('post_auth_redirect')
+        router.replace(intended)
       } catch (error) {
         console.error('[AUTH-CALLBACK] ❌ Unexpected error:', error)
         router.replace('/login?error=callback_error')

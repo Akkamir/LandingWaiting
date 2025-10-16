@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 // Optimisation: Preload de la police critique
 const inter = Inter({
@@ -53,7 +54,10 @@ export default function RootLayout({
         }} />
       </head>
       <body className="antialiased bg-app">
-        {children}
+        {/* Auth Provider pour l'état global d'authentification */}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
         <SpeedInsights />
       </body>
     </html>

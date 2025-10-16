@@ -53,6 +53,26 @@ export function Header() {
           </div>
         ) : isAuthenticated ? (
           <div className="flex items-center gap-3">
+            <div className="text-white/80 text-sm hidden md:block" aria-label="Utilisateur connecté">
+              {user?.email}
+            </div>
+            <Link 
+              href="/dashboard" 
+              className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 transition inline-flex hover:bg-white hover:text-black focus-visible:ring-2 focus-visible:ring-white/40 magnet min-h-[44px] min-w-[44px] items-center justify-center" 
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              onMouseMove={(e) => {
+                const target = e.currentTarget as HTMLAnchorElement;
+                const rect = target.getBoundingClientRect();
+                const relX = e.clientX - rect.left - rect.width/2;
+                const relY = e.clientY - rect.top - rect.height/2;
+                target.style.transform = `translate(${Math.max(Math.min(relX*0.06,10),-10)}px, ${Math.max(Math.min(relY*0.06,10),-10)}px)`;
+              }}
+              aria-label="Accéder au dashboard"
+            >
+              <span className="hidden sm:inline">Dashboard</span>
+              <span className="sm:hidden">📂</span>
+            </Link>
             <Link 
               href="/generate" 
               className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 transition inline-flex hover:bg-white hover:text-black focus-visible:ring-2 focus-visible:ring-white/40 magnet min-h-[44px] min-w-[44px] items-center justify-center" 
@@ -80,23 +100,42 @@ export function Header() {
             </button>
           </div>
         ) : (
-          <Link 
-            href="/login" 
-            className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 transition inline-flex hover:bg-white hover:text-black focus-visible:ring-2 focus-visible:ring-white/40 magnet min-h-[44px] min-w-[44px] items-center justify-center" 
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            onMouseMove={(e) => {
-              const target = e.currentTarget as HTMLAnchorElement;
-              const rect = target.getBoundingClientRect();
-              const relX = e.clientX - rect.left - rect.width/2;
-              const relY = e.clientY - rect.top - rect.height/2;
-              target.style.transform = `translate(${Math.max(Math.min(relX*0.06,10),-10)}px, ${Math.max(Math.min(relY*0.06,10),-10)}px)`;
-            }}
-            aria-label="Se connecter - Transformer mes images"
-          >
-            <span className="hidden sm:inline">Se connecter</span>
-            <span className="sm:hidden">🚀</span>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link 
+              href="/signup" 
+              className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 transition inline-flex hover:bg-white hover:text-black focus-visible:ring-2 focus-visible:ring-white/40 magnet min-h-[44px] min-w-[44px] items-center justify-center" 
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              onMouseMove={(e) => {
+                const target = e.currentTarget as HTMLAnchorElement;
+                const rect = target.getBoundingClientRect();
+                const relX = e.clientX - rect.left - rect.width/2;
+                const relY = e.clientY - rect.top - rect.height/2;
+                target.style.transform = `translate(${Math.max(Math.min(relX*0.06,10),-10)}px, ${Math.max(Math.min(relY*0.06,10),-10)}px)`;
+              }}
+              aria-label="Créer un compte"
+            >
+              <span className="hidden sm:inline">S'inscrire</span>
+              <span className="sm:hidden">📝</span>
+            </Link>
+            <Link 
+              href="/login" 
+              className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 transition inline-flex hover:bg-white hover:text-black focus-visible:ring-2 focus-visible:ring-white/40 magnet min-h-[44px] min-w-[44px] items-center justify-center" 
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              onMouseMove={(e) => {
+                const target = e.currentTarget as HTMLAnchorElement;
+                const rect = target.getBoundingClientRect();
+                const relX = e.clientX - rect.left - rect.width/2;
+                const relY = e.clientY - rect.top - rect.height/2;
+                target.style.transform = `translate(${Math.max(Math.min(relX*0.06,10),-10)}px, ${Math.max(Math.min(relY*0.06,10),-10)}px)`;
+              }}
+              aria-label="Se connecter"
+            >
+              <span className="hidden sm:inline">Se connecter</span>
+              <span className="sm:hidden">🔑</span>
+            </Link>
+          </div>
         )}
       </div>
     </header>

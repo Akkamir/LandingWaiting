@@ -1,4 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+
+// Forcer l'exécution sur Node (évite les limites Edge avec Buffer/SDKs) et empêcher la statisation
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 import { createClient } from "@supabase/supabase-js";
 import Replicate from "replicate";
 import { randomUUID } from "crypto";
@@ -7,7 +12,7 @@ import { validateInput, promptSchema, imageFileSchema, isValidUrl } from "@/lib/
 // Validation sécurisée des variables d'environnement
 function validateEnvironment() {
   const required = {
-    SUPABASE_URL: process.env.SUPABASE_URL,
+    SUPABASE_URL: process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     REPLICATE_API_TOKEN: process.env.REPLICATE_API_TOKEN,
     REPLICATE_MODEL: process.env.REPLICATE_MODEL

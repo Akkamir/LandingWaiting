@@ -68,6 +68,10 @@ export default function Home() {
         <PricingSection />
 
         <FAQSection />
+
+        <div className="container mt-8">
+          <a href="/signup" className="btn-primary btn-xl inline-flex">Créer un compte →</a>
+        </div>
       </main>
 
       <Toast 
