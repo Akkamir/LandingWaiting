@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       success_url: `${process.env.NEXT_PUBLIC_URL}/dashboard`,
       cancel_url: `${process.env.NEXT_PUBLIC_URL}/pricing`,
       allow_promotion_codes: true,
-      metadata: { user_id: user.id },
+      metadata: { user_id: user.id, price_id: priceId },
     })
 
     return NextResponse.json({ url: session.url })
