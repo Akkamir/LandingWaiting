@@ -28,7 +28,6 @@ export default function AuthCallback() {
             return
           }
         }
-        const href = typeof window !== 'undefined' ? window.location.href : null
         const sp = href ? new URL(href).searchParams : null
         const intended = sp?.get('redirectedFrom') || (typeof window !== 'undefined' ? localStorage.getItem('post_auth_redirect') : null) || '/generate'
         if (typeof window !== 'undefined') localStorage.removeItem('post_auth_redirect')
