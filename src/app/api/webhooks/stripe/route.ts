@@ -77,20 +77,24 @@ export async function POST(req: NextRequest) {
         }
 
         // Upsert en incluant user_id (NOT NULL)
+        const periodEndIso = typeof sub.current_period_end === 'number'
+          ? new Date(sub.current_period_end * 1000).toISOString()
+          : null
+
         await supabase.from('subscriptions').upsert({
           user_id: userId as string, // peut être null si non retrouvable; la DB lèvera une erreur et sera catchée
           stripe_subscription_id: sub.id,
           stripe_customer_id: customerId,
           stripe_price_id: sub.items?.data?.[0]?.price?.id || null,
           status: sub.status,
-          current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+          current_period_end: periodEndIso,
           quota_limit: quota,
         }, { onConflict: 'stripe_subscription_id' })
         break
       }
       case 'customer.subscription.deleted': {
         const sub = event.data.object as any
-        await supabase.from('subscriptions').update({ status: 'canceled' }).eq('stripe_subscription_id', sub.id)
+        await supabase.from('subscriptions').update({ status: 'canceled', current_period_end: null }).eq('stripe_subscription_id', sub.id)
         break
       }
       case 'invoice.payment_succeeded': {
