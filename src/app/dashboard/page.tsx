@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { SubscriptionStatus } from "@/components/SubscriptionStatus";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { createBrowserSupabase } from "@/lib/supabaseClient";
@@ -86,6 +87,10 @@ export default function DashboardPage() {
       </header>
 
       <div className="container py-10 min-h-screen">
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <SubscriptionStatus />
+        <PortalButton />
+      </div>
       <h1 className="text-2xl font-semibold mb-6">Mes images</h1>
       {error && <div className="mb-4 text-sm text-red-300">{error}</div>}
 
@@ -181,6 +186,27 @@ export default function DashboardPage() {
       )}
       </div>
     </>
+  );
+}
+
+function PortalButton() {
+  async function openPortal() {
+    try {
+      const supabase = createBrowserSupabase();
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      const res = await fetch('/api/create-portal-session', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || 'Erreur portail');
+      window.location.href = json.url;
+    } catch {}
+  }
+
+  return (
+    <button className="btn-secondary" onClick={openPortal}>Gérer mon abonnement</button>
   );
 }
 

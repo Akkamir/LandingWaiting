@@ -106,6 +106,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
 
+    // Vérifier abonnement actif + quotas (sécurité serveur)
+    const { data: sub } = await supabase
+      .from('subscriptions')
+      .select('status, quota_limit, quota_used, user_id')
+      .eq('user_id', userId)
+      .maybeSingle();
+    if (!sub || sub.user_id !== userId) {
+      return NextResponse.json({ error: 'Abonnement requis' }, { status: 402 });
+    }
+    if (sub.status !== 'active') {
+      return NextResponse.json({ error: 'Abonnement inactif' }, { status: 402 });
+    }
+    if ((sub.quota_used ?? 0) >= (sub.quota_limit ?? 0)) {
+      return NextResponse.json({ error: 'Quota atteint' }, { status: 402 });
+    }
+
     // Validation sécurisée des données d'entrée
     const formData = await req.formData();
     const prompt = formData.get("prompt") as string | null;
@@ -274,6 +290,12 @@ export async function POST(req: NextRequest) {
       });
       return NextResponse.json({ error: `DB insert: ${insertErr.message}`, errorId }, { status: 400 });
     }
+
+    // Incrémenter le quota utilisé après succès
+    await supabase
+      .from('subscriptions')
+      .update({ quota_used: (sub.quota_used ?? 0) + 1 })
+      .eq('user_id', userId);
 
     console.log("[GENERATE] Generation completed successfully", { 
       projectId, 
