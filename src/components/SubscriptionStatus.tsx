@@ -11,21 +11,44 @@ type SubRow = {
 
 export function SubscriptionStatus() {
   const [sub, setSub] = useState<SubRow | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    (async () => {
-      const supabase = createBrowserSupabase()
+    let mounted = true
+    const supabase = createBrowserSupabase()
+
+    async function fetchSub() {
       const { data: session } = await supabase.auth.getSession()
       const user = session.session?.user
-      if (!user) return
+      if (!user) { if (mounted) setLoading(false); return }
       const { data } = await supabase
         .from('subscriptions')
         .select('stripe_price_id,status,quota_limit,quota_used')
         .eq('user_id', user.id)
         .maybeSingle()
-      setSub(data || null)
-    })()
+      if (mounted) {
+        setSub(data || null)
+        setLoading(false)
+      }
+    }
+
+    fetchSub()
+
+    // Refresh au retour du checkout: si URL contient success, re-fetch plusieurs fois
+    if (typeof window !== 'undefined' && window.location.search.includes('success')) {
+      const retries = [1000, 2000, 4000]
+      retries.forEach((delay) => setTimeout(fetchSub, delay))
+    }
+
+    const i = setInterval(fetchSub, 30000)
+    return () => { mounted = false; clearInterval(i) }
   }, [])
+
+  if (loading) {
+    return (
+      <div className="rounded-lg border border-white/10 p-3 text-white/70">Chargement...</div>
+    )
+  }
 
   if (!sub) {
     return (
