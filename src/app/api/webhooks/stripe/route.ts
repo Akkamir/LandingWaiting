@@ -47,10 +47,34 @@ export async function POST(req: NextRequest) {
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         const sub = event.data.object as any
+        const customerId = sub.customer as string
         const quota = STRIPE_PRICE_LIMITS[sub.items?.data?.[0]?.price?.id || ''] || 50
+
+        // Récupérer user_id depuis le customer Stripe (métadonnées posées à la création)
+        let userId: string | null = null
+        try {
+          const customer = await stripe.customers.retrieve(customerId)
+          if (customer && typeof customer === 'object') {
+            const meta: any = (customer as any).metadata || {}
+            if (meta.user_id && typeof meta.user_id === 'string') userId = meta.user_id
+          }
+        } catch {}
+
+        // Fallback: tenter de retrouver un user_id existant via stripe_customer_id
+        if (!userId) {
+          const { data: existing } = await supabase
+            .from('subscriptions')
+            .select('user_id')
+            .eq('stripe_customer_id', customerId)
+            .maybeSingle()
+          userId = existing?.user_id ?? null
+        }
+
+        // Upsert en incluant user_id (NOT NULL)
         await supabase.from('subscriptions').upsert({
+          user_id: userId as string, // peut être null si non retrouvable; la DB lèvera une erreur et sera catchée
           stripe_subscription_id: sub.id,
-          stripe_customer_id: sub.customer as string,
+          stripe_customer_id: customerId,
           stripe_price_id: sub.items?.data?.[0]?.price?.id || null,
           status: sub.status,
           current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
